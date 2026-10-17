@@ -92,9 +92,9 @@ Moved ahead of the metadata/device work because headings 4–7 need real video f
 
 ## 8. Scripts
 
-- [ ] `package.json` scripts: `studio` (`remotion studio src/index.ts`), `render` (`remotion render src/index.ts Showcase out/showcase.mp4 --props=showcase.json`), `samples`, `typecheck` (`tsc --noEmit`).
-  - Verify: `npm run studio` opens Studio and shows the Showcase composition (close it after checking).
-- [ ] Confirm `npm run render -- --props=examples/single.json` overrides the default props (the trailing `--props` must win over the one in the script; if npm argument ordering prevents this, implement a tiny `scripts/render.mjs` wrapper that forwards args).
+- [x] `package.json` scripts: `studio` (`remotion studio src/index.ts`), `render` (`remotion render src/index.ts Showcase out/showcase.mp4 --props=showcase.json`), `samples`, `typecheck` (`tsc --noEmit`).
+  - Verify: `npm run studio` opens Studio and shows the Showcase composition (close it after checking). Done: Studio served `/Showcase`, listed the composition with both clips in the timeline, and the preview showed the phones when scrubbed to 2 s. Studio reports it cannot save default props back because they come from `showcase.json` rather than an inline literal; that is by design and is documented.
+- [x] Confirm `npm run render -- --props=examples/single.json` overrides the default props via `scripts/render.mjs`, which adds `--props=showcase.json` only when no `--props` is given, takes an optional output path as the first positional argument, and forwards every other flag to `remotion render`.
   - Verify: the output MP4 shows one centered phone, not two.
 
 ## 9. Docs
