@@ -1,0 +1,18 @@
+{
+  "output": { "width": 1080, "height": 1350, "fps": 30 },
+  "background": "#FFFFFF",
+  "clips": [
+    {
+      "src": "sample-b.mp4",
+      "trimStart": 1,
+      "trimEnd": 7,
+      "device": "galaxy-s25-ultra",
+      "finish": "titanium-black",
+      "label": "Checkout"
+    }
+  ],
+  "layout": "single",
+  "shadow": { "enabled": true, "blur": 40, "offsetY": 20, "opacity": 0.18 },
+  "intro": 0.5,
+  "outro": 0.5
+}

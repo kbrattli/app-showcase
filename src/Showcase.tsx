@@ -56,7 +56,12 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
       : 9 / 19.5;
     const bodyAspect = getBodyAspect(clip.device, sourceAspect);
     const bodyHeight = Math.min(maxHeight, maxWidthPerDevice / bodyAspect);
-    const geometry = getGeometry(clip.device, bodyHeight, sourceAspect);
+    const geometry = getGeometry(
+      clip.device,
+      bodyHeight,
+      sourceAspect,
+      clip.finish,
+    );
     const clipFrames =
       clip.trimEnd === undefined
         ? bodyFrames

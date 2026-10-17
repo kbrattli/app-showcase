@@ -7,7 +7,8 @@ import { Showcase } from "./Showcase";
 
 /**
  * Validates the props (from showcase.json or --props), reads each clip's real
- * duration from public/, and derives the video's dimensions, fps and duration.
+ * duration from public/, and derives the video's dimensions, fps and
+ * duration.
  * Nothing here is hardcoded.
  */
 const calculateMetadata: CalculateMetadataFunction<ShowcaseInput> = async ({

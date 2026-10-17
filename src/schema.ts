@@ -1,5 +1,6 @@
 import { zColor } from "@remotion/zod-types";
 import { z } from "zod";
+import { DEVICE_NAMES, resolveModel } from "./devices/models";
 
 /**
  * Schema for `showcase.json`. Every field a user or AI agent can edit is
@@ -9,8 +10,10 @@ import { z } from "zod";
  */
 
 export const deviceSchema = z
-  .enum(["iphone", "android", "none"])
-  .describe("Device frame drawn around the recording");
+  .enum(DEVICE_NAMES)
+  .describe(
+    "Phone model drawn around the recording. `iphone` and `android` always mean the newest model; `none` is a plain rounded rectangle",
+  );
 
 export const layoutSchema = z.enum(["single", "sideBySide"]);
 
@@ -31,6 +34,12 @@ export const clipSchema = z
       .optional()
       .describe("Second at which the recording stops. Omit to play to the end"),
     device: deviceSchema.default("iphone"),
+    finish: z
+      .string()
+      .optional()
+      .describe(
+        "Body colour of the phone, by name (see README). Defaults to the model's first finish",
+      ),
     label: z
       .string()
       .optional()
@@ -43,7 +52,20 @@ export const clipSchema = z
   .refine(
     (clip) => clip.trimEnd === undefined || clip.trimEnd > clip.trimStart,
     { message: "trimEnd must be greater than trimStart", path: ["trimEnd"] },
-  );
+  )
+  .superRefine((clip, ctx) => {
+    const model = resolveModel(clip.device);
+    if (clip.finish === undefined || model === null) {
+      return;
+    }
+    if (!(clip.finish in model.finishes)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["finish"],
+        message: `finish "${clip.finish}" does not exist for ${model.label}. Choose one of: ${Object.keys(model.finishes).join(", ")}`,
+      });
+    }
+  });
 
 /**
  * Default output is 4:5 portrait (1080 x 1350): a phone is tall, so this

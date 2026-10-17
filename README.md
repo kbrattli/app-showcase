@@ -1,7 +1,7 @@
 # app-showcase
 
-Turn one or two mobile screen recordings into a polished showcase MP4: phones
-drawn in CSS, a flat background, a soft shadow, and a fade in and out. The
+Turn one or two mobile screen recordings into a polished showcase MP4: real phone
+models drawn as vector art, a flat background, a soft shadow, and a fade in and out. The
 whole video is described by one JSON file, so a person or an AI agent can
 change it without touching React code. Built with [Remotion](https://www.remotion.dev).
 
@@ -41,6 +41,19 @@ change it without touching React code. Built with [Remotion](https://www.remotio
 The repo ships with two generated sample recordings, so `npm run render`
 works straight after `npm install`.
 
+### With an AI agent
+
+Open the repo in Claude Code, Codex, Cursor or any agent that reads
+`CLAUDE.md` / `AGENTS.md`, hand it your recording and say:
+
+> Make an app showcase for this video, iPhone 15 Pro
+
+That is the whole job. The agent copies the recording into `public/`, picks
+the drawn model, renders, and gives you `out/showcase.mp4`. Every model is
+drawn from its real dimensions, so you never need a bezel image or any other
+file to show what the phone looks like. Any model from the table below works
+("Pixel 10 Pro", "Galaxy S25 Ultra", "black iPhone 16 Pro").
+
 ## Scripts
 
 | Command | What it does |
@@ -72,7 +85,8 @@ anything wrong, including a missing video file or a trim past the end of it.
 | `clips[].src` | string | required | File name inside `public/`, for example `"demo.mp4"`. |
 | `clips[].trimStart` | seconds | `0` | Skip this much of the start of the recording. |
 | `clips[].trimEnd` | seconds | end of file | Stop the recording at this second. Must be greater than `trimStart` and within the file. |
-| `clips[].device` | `"iphone"` \| `"android"` \| `"none"` | `"iphone"` | Frame to draw. `none` shows the recording with rounded corners and no frame, at its own aspect ratio. |
+| `clips[].device` | model id, `"iphone"`, `"android"` or `"none"` | `"iphone"` | Phone drawn around the recording. Model ids: `iphone-17-pro`, `iphone-17`, `iphone-16-pro`, `iphone-16`, `iphone-15-pro`, `pixel-10-pro`, `pixel-9-pro`, `galaxy-s25`, `galaxy-s25-ultra`. `iphone` and `android` always mean the newest Pro model. `none` shows the recording with rounded corners and no frame, at its own aspect ratio. |
+| `clips[].finish` | string | first finish of the model | Body colour. See the finishes table below. |
 | `clips[].label` | string | none | Caption shown under the device. |
 | `clips[].muted` | boolean | `true` | Set to `false` to keep the recording's audio. |
 | `layout` | `"single"` \| `"sideBySide"` | `sideBySide` for two clips, else `single` | How devices are arranged. |
@@ -88,10 +102,32 @@ The video's length is computed, not set: longest trimmed clip + `intro` +
 Recordings whose aspect ratio does not match the device screen are scaled to
 cover and centered, never stretched.
 
+### Phone models and finishes
+
+Every model is drawn as vector art from its real dimensions (body size,
+screen size, bezel width, corner shape, button layout), so it scales to any
+output size. The recording is scaled to cover the model's screen, so pick the
+model it was recorded on: iPhone 16 is 6.1", the other iPhones are 6.3",
+the Pixels are 6.3" at 20:9 and the Galaxy S25 is 19.5:9.
+
+| `device` | Finishes (`finish`) |
+| --- | --- |
+| `iphone-17-pro` (also `iphone`) | `silver`, `cosmic-orange`, `deep-blue` |
+| `iphone-17` | `black`, `white`, `sage`, `lavender`, `mist-blue` |
+| `iphone-16-pro` | `natural`, `black`, `white`, `desert` |
+| `iphone-16` | `black`, `white`, `pink`, `teal`, `ultramarine` |
+| `iphone-15-pro` | `natural`, `blue`, `white`, `black` |
+| `pixel-10-pro` (also `android`) | `obsidian`, `porcelain`, `moonstone`, `jade` |
+| `pixel-9-pro` | `obsidian`, `porcelain`, `hazel`, `rose-quartz` |
+| `galaxy-s25` | `navy`, `icy-blue`, `mint`, `silver-shadow` |
+| `galaxy-s25-ultra` | `titanium-silverblue`, `titanium-black`, `titanium-gray`, `titanium-whitesilver` |
+
 ### Examples
 
 - `showcase.json`: the default, both samples side by side with labels.
 - `examples/single.json`: one iPhone, centered.
+- `examples/models.json`: iPhone 17 Pro in cosmic orange next to a Pixel 10 Pro in porcelain.
+- `examples/galaxy.json`: one Galaxy S25 Ultra.
 
 ## How it works
 
@@ -100,7 +136,9 @@ cover and centered, never stretched.
 - `src/Root.tsx` registers the `Showcase` composition and uses
   `calculateMetadata` to read each clip's real duration and derive the
   output size, fps and length.
-- `src/devices/` draws the phones with plain CSS (no image assets, nothing to
+- `src/devices/` draws the phones as vector art: `models.ts` holds each
+  model's real dimensions, `finishes.ts` the colour palettes and
+  `PhoneSvg.tsx` renders any model from them (no image assets, nothing to
   license), sized from the output frame so 4K renders are not tiny phones.
 - `src/ClipVideo.tsx` plays each recording with `OffthreadVideo`, trimmed per
   the JSON and clipped to the screen's rounded corners.
