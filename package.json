@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Cloneable, AI-editable Remotion toolkit that turns mobile screen recordings into a showcase MP4",
   "repository": {},
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=20"
   },

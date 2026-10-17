@@ -99,11 +99,12 @@ Moved ahead of the metadata/device work because headings 4–7 need real video f
 
 ## 9. Docs
 
-- [ ] `README.md`: purpose, requirements (Node >= 20, no ffmpeg or Python), three-step quick start, full field table for `showcase.json`, how to use `examples/single.json` and `--props`, Remotion license note (free for individuals and companies up to three people, paid above).
+- [x] `README.md`: purpose, requirements (Node >= 20, no ffmpeg or Python), three-step quick start, full field table for `showcase.json`, how to use `examples/single.json` and `--props`, Remotion license note (free for individuals and companies up to three people, paid above).
   - Verify: every field in `src/schema.ts` appears in the README table (`grep` each key).
-- [ ] `CLAUDE.md`: repo layout, where recordings go, every field, which files to touch for trim / swap device / background / shadow / label / vertical, how to verify with `npm run render`, what not to touch (`src/devices`, `remotion.config.ts`, `public/sample-*.mp4`), three example user prompts with the exact JSON edits.
+- [x] `CLAUDE.md`: repo layout, where recordings go, every field, which files to touch for trim / swap device / background / shadow / label / vertical, how to verify with `npm run render`, what not to touch (`src/devices`, `remotion.config.ts`, `public/sample-*.mp4`), three example user prompts with the exact JSON edits.
   - Verify: file reads cleanly and references only paths that exist (`grep -o 'src/[A-Za-z/._-]*' CLAUDE.md | xargs ls`).
-- [ ] `AGENTS.md` identical to `CLAUDE.md`.
+- [x] `LICENSE` (MIT) added since the README states the repo code is MIT; adjust the copyright holder if needed.
+- [x] `AGENTS.md` identical to `CLAUDE.md`.
   - Verify: `diff CLAUDE.md AGENTS.md` prints nothing.
 
 ## 10. Final verification
