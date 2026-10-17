@@ -1,0 +1,37 @@
+{
+  "name": "app-showcase",
+  "version": "1.0.0",
+  "description": "Cloneable, AI-editable Remotion toolkit that turns mobile screen recordings into a showcase MP4",
+  "repository": {},
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true,
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/zod-types": "^4.0.536",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.536",
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "eslint": "10.12.0",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "node scripts/render.mjs",
+    "samples": "node scripts/samples.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src && tsc --noEmit"
+  },
+  "allowScripts": {
+    "esbuild": false
+  }
+}
