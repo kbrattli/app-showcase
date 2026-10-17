@@ -52,9 +52,9 @@ Moved ahead of the metadata/device work because headings 4–7 need real video f
 
 ## 4. Duration and metadata
 
-- [ ] Implement `calculateMetadata` in `src/Root.tsx`: `durationInFrames = ceil((max(trimEnd - trimStart) + intro + outro) * fps)`, and set `width`, `height`, `fps` from `output`. Never hardcode the duration.
+- [x] Implement `calculateMetadata` in `src/Root.tsx`: `durationInFrames = ceil((max(trimEnd - trimStart) + intro + outro) * fps)`, and set `width`, `height`, `fps` from `output`. Never hardcode the duration.
   - Verify: `npx remotion compositions src/index.ts` reports the expected duration for the default config (longest clip + 1 s at 30 fps).
-- [ ] Inside `calculateMetadata`, check each `clips[].src` exists under `public/` (use `staticFile` plus a `fetch` HEAD, or `fs.existsSync` on the Node side) and throw a readable error naming the missing file.
+- [x] Inside `calculateMetadata`, check each `clips[].src` exists under `public/` (a `fetch` HEAD on `staticFile(src)`, then Mediabunny `computeDuration()` to resolve an omitted `trimEnd` and reject trims past the end of the file) and throw a readable error naming the missing file.
   - Verify: temporarily point `examples/single.json` at `missing.mp4` and confirm `npx remotion render ... --props=examples/single.json` fails with a message that names `missing.mp4`; then revert.
 
 ## 5. Device frames (CSS only)

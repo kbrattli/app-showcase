@@ -1,26 +1,34 @@
 import { Composition, type CalculateMetadataFunction } from "remotion";
 import showcaseJson from "../showcase.json";
 import { parseShowcase } from "./loadConfig";
+import { resolveClips } from "./probe";
 import { showcaseSchema, type ShowcaseInput } from "./schema";
 import { Showcase } from "./Showcase";
 
 /**
- * Validates the props (from showcase.json or --props) and derives the video's
- * dimensions, fps and duration from them. Nothing here is hardcoded.
+ * Validates the props (from showcase.json or --props), reads each clip's real
+ * duration from public/, and derives the video's dimensions, fps and duration.
+ * Nothing here is hardcoded.
  */
-const calculateMetadata: CalculateMetadataFunction<ShowcaseInput> = ({ props }) => {
+const calculateMetadata: CalculateMetadataFunction<ShowcaseInput> = async ({
+  props,
+  abortSignal,
+}) => {
   const config = parseShowcase(props);
+  const resolved = await resolveClips(config, abortSignal);
+
   const longestClip = Math.max(
-    ...config.clips.map((clip) => (clip.trimEnd ?? 0) - clip.trimStart),
+    ...resolved.clips.map((clip) => clip.trimEnd - clip.trimStart),
   );
-  const totalSeconds = longestClip + config.intro + config.outro;
+  const totalSeconds = longestClip + resolved.intro + resolved.outro;
+  const { width, height, fps } = resolved.output;
 
   return {
-    width: config.output.width,
-    height: config.output.height,
-    fps: config.output.fps,
-    durationInFrames: Math.max(1, Math.ceil(totalSeconds * config.output.fps)),
-    props: config,
+    width,
+    height,
+    fps,
+    durationInFrames: Math.max(1, Math.ceil(totalSeconds * fps)),
+    props: resolved,
   };
 };
 
