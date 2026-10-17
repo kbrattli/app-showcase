@@ -4,13 +4,29 @@ You are editing a Remotion project that turns mobile screen recordings into a
 showcase MP4. Almost every request can be satisfied by editing one JSON file.
 Read this whole file before changing anything.
 
+## This repo is a tool, not a gallery
+
+The user runs this project to produce a showcase video from their own
+recording. The recording, the edited `showcase.json` and the rendered MP4 are
+the user's work product for that session, not repository content.
+
+- Never commit, and never offer to commit, push or open a PR for: recordings
+  added to `public/`, changes to `showcase.json`, or anything in `out/`.
+  `.gitignore` already excludes recordings and `out/`; `showcase.json` is
+  tracked only so a fresh clone renders, and `git checkout showcase.json`
+  restores the sample config.
+- The deliverable is `out/showcase.mp4`. Hand it to the user when the render
+  is done, and end there. Do not ask about git.
+- Commit only when the user changes the tool itself (`src/`, `scripts/`,
+  docs, `.gitignore`) and asks for a commit.
+
 ## Repo layout
 
 | Path | Purpose | Touch it? |
 | --- | --- | --- |
 | `showcase.json` | The video description. **This is the file to edit for nearly every request.** | Yes |
 | `examples/*.json` | Alternative configs. Render one with `npm run render -- --props=examples/<name>.json`. | Yes, add more as needed |
-| `public/` | Screen recordings go here. Referenced by file name only in `clips[].src`. | Add files; do not delete `sample-a.mp4` / `sample-b.mp4` |
+| `public/` | Screen recordings go here. Referenced by file name only in `clips[].src`. Git-ignored except the two samples. | Add files; never commit them; do not delete `sample-a.mp4` / `sample-b.mp4` |
 | `out/` | Render output (`showcase.mp4`). Git-ignored. | Read only |
 | `src/schema.ts` | zod schema of `showcase.json`, with defaults. | Only when adding a new field |
 | `src/loadConfig.ts` | Validation and readable error messages. | Rarely |

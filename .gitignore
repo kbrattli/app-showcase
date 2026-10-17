@@ -4,3 +4,9 @@ out/
 .DS_Store
 .env
 *.log
+
+# User recordings live in public/ but are never part of the repo.
+# Only the two sample recordings the repo needs to render on a fresh clone stay tracked.
+public/*
+!public/sample-a.mp4
+!public/sample-b.mp4
