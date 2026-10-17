@@ -41,13 +41,13 @@ Environment at planning time: Node v24.21.0, npm 11.19.0, Remotion 4.0.536 (late
 
 Moved ahead of the metadata/device work because headings 4–7 need real video files to verify against.
 
-- [ ] Create `src/samples/SampleA.tsx` and `SampleB.tsx`: simple animated fake app screens (header, list cards sliding in, a button press) at 1170x2532, 30 fps, 6 s and 8 s.
+- [x] Create `src/samples/SampleA.tsx` and `SampleB.tsx`: simple animated fake app screens (header, list cards sliding in, a button press) at 1170x2532, 30 fps, 6 s and 8 s.
   - Verify: `npx tsc --noEmit` passes.
-- [ ] Register both as compositions in a separate `src/samples/index.ts` entry so they do not appear in the main Studio list.
+- [x] Register both as compositions in a separate `src/samples/index.ts` entry so they do not appear in the main Studio list.
   - Verify: `npx remotion compositions src/samples/index.ts` lists `SampleA` and `SampleB`.
-- [ ] Add `npm run samples` script rendering both to `public/sample-a.mp4` and `public/sample-b.mp4` with `--crf 28` to keep them small.
-  - Verify: `ls -la public/*.mp4` shows both files under 3 MB each.
-- [ ] Commit the two MP4s so a fresh clone renders without running `npm run samples`.
+- [x] Add `npm run samples` script rendering both to `public/sample-a.mp4` and `public/sample-b.mp4` with `--crf 28` to keep them small.
+  - Verify: `ls -la public/*.mp4` shows both files under 3 MB each. Result: sample-a.mp4 212 KB, sample-b.mp4 133 KB.
+- [x] Commit the two MP4s so a fresh clone renders without running `npm run samples`.
   - Verify: `git ls-files public/` lists both MP4s.
 
 ## 4. Duration and metadata
