@@ -109,14 +109,14 @@ Moved ahead of the metadata/device work because headings 4–7 need real video f
 
 ## 10. Final verification
 
-- [ ] `npx tsc --noEmit` passes with zero errors.
-- [ ] `npm run render` produces `out/showcase.mp4`; log contains no warnings about missing durations, unmounted videos, or deprecated props.
+- [x] `npx tsc --noEmit` passes with zero errors.
+- [x] `npm run render` produces `out/showcase.mp4`; log contains no warnings about missing durations, unmounted videos, or deprecated props.
   - Verify: `ls -la out/showcase.mp4` and inspect the render log.
-- [ ] Probe the output: duration equals longest trimmed clip + 1 s, dimensions 1920x1080, 30 fps. Use `npx remotion` metadata output or a Node probe via `@remotion/media-parser`.
-- [ ] Open `out/showcase.mp4` and confirm: white background, two phones side by side, both trimmed per JSON, soft shadow, fade in and out.
-- [ ] `npm run render -- --props=examples/single.json` renders one centered phone.
-- [ ] Vertical check: copy `examples/single.json` to a scratch file with `output` 1080x1920, render, confirm the device is correctly sized (not tiny, not clipped).
-- [ ] 4K check: scratch config at 3840x2160, render a still, confirm the phone scales with the frame.
-- [ ] Fresh-clone check: `git clone . /tmp/showcase-fresh && cd /tmp/showcase-fresh && npm install && npm run render` succeeds.
-- [ ] Remove scratch files, ensure `out/` is gitignored, final commit.
-- [ ] Write the closing summary: what was built, exact preview and render commands, anything not verified.
+- [x] Probe the output: duration equals longest trimmed clip + 1 s, dimensions 1920x1080, 30 fps. Probed with Mediabunny: `out/showcase.mp4` = 7.0 s, 1920x1080, 30 fps.
+- [x] Open `out/showcase.mp4` and confirm: white background, two phones side by side, both trimmed per JSON, soft shadow, fade in and out. Checked via extracted frames (frame 0 white, frame 15 fully visible, frame 100 mid-clip, frame 209 white).
+- [x] `npm run render -- --props=examples/single.json` renders one centered phone.
+- [x] Vertical check: copy `examples/single.json` to a scratch file with `output` 1080x1920, render, confirm the device is correctly sized (not tiny, not clipped). `out/vertical.mp4` = 1080x1920, device fills ~84% of the width.
+- [x] 4K check: scratch config at 3840x2160, render a still, confirm the phone scales with the frame. Still at 3840x2160 shows the same proportions as 1080p.
+- [x] Fresh-clone check: `git clone . /tmp/showcase-fresh && cd /tmp/showcase-fresh && npm install && npm run render` succeeds.
+- [x] Remove scratch files, ensure `out/` is gitignored, final commit. Scratch configs lived outside the repo; `git status` is clean.
+- [x] Write the closing summary: what was built, exact preview and render commands, anything not verified.
