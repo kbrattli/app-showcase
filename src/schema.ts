@@ -45,9 +45,14 @@ export const clipSchema = z
     { message: "trimEnd must be greater than trimStart", path: ["trimEnd"] },
   );
 
+/**
+ * Default output is 4:5 portrait (1080 x 1350): a phone is tall, so this
+ * fills the frame instead of leaving empty space either side, and it is the
+ * tallest format Instagram, LinkedIn, X and Threads show uncropped in feed.
+ */
 export const outputSchema = z.object({
-  width: z.number().int().positive().default(1920),
-  height: z.number().int().positive().default(1080),
+  width: z.number().int().positive().default(1080),
+  height: z.number().int().positive().default(1350),
   fps: z.number().positive().default(30),
 });
 

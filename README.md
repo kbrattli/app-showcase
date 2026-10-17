@@ -64,8 +64,8 @@ anything wrong, including a missing video file or a trim past the end of it.
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `output.width` | integer | `1920` | Frame width in pixels. |
-| `output.height` | integer | `1080` | Frame height in pixels. Use `1080` x `1920` for vertical, `3840` x `2160` for 4K. |
+| `output.width` | integer | `1080` | Frame width in pixels. |
+| `output.height` | integer | `1350` | Frame height in pixels. The default is 4:5 portrait, which fits a phone and plays uncropped in Instagram, LinkedIn, X and Threads feeds. Use `1920` x `1080` for landscape (YouTube, a website hero), `1080` x `1920` for vertical (Reels, Shorts), `2160` x `2700` for a sharper 4:5 master. |
 | `output.fps` | number | `30` | Frames per second. |
 | `background` | hex color | `"#FFFFFF"` | Flat color filling the whole frame. |
 | `clips` | array (1–2) | required | The recordings to show. |

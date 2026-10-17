@@ -43,10 +43,12 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
   const labelFontSize = 26 * scale;
   const labelBlock = hasLabels ? labelFontSize * 3 : 0;
 
+  // The device fills most of the frame; the remaining margin leaves room for
+  // the drop shadow and keeps the phone off the edges of the video.
   const count = config.layout === "sideBySide" ? config.clips.length : 1;
-  const gap = count > 1 ? width * 0.06 : 0;
-  const maxHeight = height * (count > 1 ? 0.72 : 0.76) - labelBlock;
-  const maxWidthPerDevice = (width * 0.84 - gap * (count - 1)) / count;
+  const gap = count > 1 ? width * 0.05 : 0;
+  const maxHeight = height * (count > 1 ? 0.84 : 0.88) - labelBlock;
+  const maxWidthPerDevice = (width * 0.9 - gap * (count - 1)) / count;
 
   const clips = config.clips.slice(0, count).map((clip) => {
     const sourceAspect = isResolved(clip)
@@ -78,52 +80,58 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
   return (
     <AbsoluteFill style={{ backgroundColor: config.background }}>
       <AbsoluteFill
-        style={{
-          opacity,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap,
-        }}
+        style={{ opacity, alignItems: "center", justifyContent: "center" }}
       >
-        {clips.map(({ clip, geometry, clipFrames }, index) => (
-          <div
-            key={`${clip.src}-${index}`}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: labelFontSize * 1.2,
-            }}
-          >
-            <DeviceFrame
-              geometry={geometry}
-              shadow={config.shadow}
-              scale={scale}
+        {/* Devices sit on a common baseline so captions line up even when
+            the phones differ in height. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            gap,
+          }}
+        >
+          {clips.map(({ clip, geometry, clipFrames }, index) => (
+            <div
+              key={`${clip.src}-${index}`}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: labelFontSize * 1.2,
+              }}
             >
-              <ClipVideo
-                clip={clip}
-                startFrame={introFrames}
-                clipFrames={clipFrames}
-              />
-            </DeviceFrame>
-            {hasLabels ? (
-              <div
-                style={{
-                  fontFamily: LABEL_FONT,
-                  fontSize: labelFontSize,
-                  fontWeight: 500,
-                  color: "#111111",
-                  letterSpacing: -0.2,
-                  textAlign: "center",
-                  minHeight: labelFontSize * 1.3,
-                }}
+              <DeviceFrame
+                geometry={geometry}
+                shadow={config.shadow}
+                scale={scale}
               >
-                {clip.label ?? ""}
-              </div>
-            ) : null}
-          </div>
-        ))}
+                <ClipVideo
+                  clip={clip}
+                  startFrame={introFrames}
+                  clipFrames={clipFrames}
+                />
+              </DeviceFrame>
+              {hasLabels ? (
+                <div
+                  style={{
+                    fontFamily: LABEL_FONT,
+                    fontSize: labelFontSize,
+                    fontWeight: 500,
+                    color: "#111111",
+                    letterSpacing: -0.2,
+                    textAlign: "center",
+                    minHeight: labelFontSize * 1.3,
+                  }}
+                >
+                  {clip.label ?? ""}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
       </AbsoluteFill>
     </AbsoluteFill>
   );

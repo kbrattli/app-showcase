@@ -8,30 +8,40 @@ import type { Device } from "../schema";
 type DeviceSpec = {
   /** Screen width / height. */
   screenAspect: number;
-  /** Bezel thickness as a fraction of screen width. */
+  /** Distance from the outer body edge to the screen, as a fraction of screen width. */
   bezel: number;
+  /** Thickness of the metal band at the outside of that bezel, as a fraction of screen width. */
+  band: number;
   /** Outer body corner radius as a fraction of screen width. */
   bodyRadius: number;
-  /** Dark body color. */
+  /** Near-black glass bezel between the band and the screen. */
   bodyColor: string;
-  /** Thin lighter ring around the body edge. */
+  /** Flat fallback color of the metal band (buttons, antenna lines). */
   edgeColor: string;
+  /** Brushed-metal gradient painted on the band. */
+  bandGradient: string;
 };
 
 const SPECS: Record<Exclude<Device, "none">, DeviceSpec> = {
   iphone: {
-    screenAspect: 1170 / 2532,
-    bezel: 0.034,
-    bodyRadius: 0.15,
-    bodyColor: "#0D0D0F",
-    edgeColor: "#3B3B40",
+    screenAspect: 1206 / 2622,
+    bezel: 0.05,
+    band: 0.02,
+    bodyRadius: 0.17,
+    bodyColor: "#060607",
+    edgeColor: "#4A4A4F",
+    bandGradient:
+      "linear-gradient(155deg, #7E7E84 0%, #4F4F55 22%, #343438 48%, #4B4B50 72%, #85858B 100%)",
   },
   android: {
-    screenAspect: 1080 / 2400,
-    bezel: 0.032,
-    bodyRadius: 0.115,
-    bodyColor: "#121214",
-    edgeColor: "#34343A",
+    screenAspect: 1080 / 2424,
+    bezel: 0.054,
+    band: 0.018,
+    bodyRadius: 0.125,
+    bodyColor: "#09090B",
+    edgeColor: "#3C3C42",
+    bandGradient:
+      "linear-gradient(155deg, #6B6B71 0%, #3F3F45 25%, #2A2A2F 50%, #3D3D43 75%, #74747A 100%)",
   },
 };
 
@@ -41,12 +51,14 @@ export type DeviceGeometry = {
   bodyHeight: number;
   bodyRadius: number;
   bezel: number;
+  /** Metal band thickness in px (0 for `none`). */
   edge: number;
   screenWidth: number;
   screenHeight: number;
   screenRadius: number;
   bodyColor: string;
   edgeColor: string;
+  bandGradient: string;
 };
 
 /** Body width / height for a device, given the recording's own aspect. */
@@ -80,6 +92,7 @@ export const getGeometry = (
       screenRadius: radius,
       bodyColor: "transparent",
       edgeColor: "transparent",
+      bandGradient: "none",
     };
   }
 
@@ -95,11 +108,12 @@ export const getGeometry = (
     bodyHeight,
     bodyRadius,
     bezel,
-    edge: Math.max(1, u * 0.006),
+    edge: Math.max(1.5, u * spec.band),
     screenWidth: u,
     screenHeight: u / spec.screenAspect,
     screenRadius: Math.max(0, bodyRadius - bezel),
     bodyColor: spec.bodyColor,
     edgeColor: spec.edgeColor,
+    bandGradient: spec.bandGradient,
   };
 };

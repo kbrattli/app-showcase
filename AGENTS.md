@@ -51,8 +51,8 @@ it; do not invent a file name.
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `output.width` | integer | `1920` | Frame width. |
-| `output.height` | integer | `1080` | Frame height. Vertical is `1080` x `1920`; 4K is `3840` x `2160`. |
+| `output.width` | integer | `1080` | Frame width. |
+| `output.height` | integer | `1350` | Frame height. Default is 4:5 portrait (fits a phone, uncropped on Instagram, LinkedIn, X, Threads). Landscape is `1920` x `1080`; vertical is `1080` x `1920`; sharper 4:5 is `2160` x `2700`. |
 | `output.fps` | number | `30` | Frames per second. |
 | `background` | hex color string | `"#FFFFFF"` | Flat color filling the frame. |
 | `clips` | array of 1–2 | required | Recordings to show. |
@@ -83,7 +83,8 @@ try to set it directly.
 | Softer / stronger / no shadow | `showcase.json` → `shadow.*` (lower `opacity` and raise `blur` for softer; `enabled: false` for none) |
 | Add or change a caption | `showcase.json` → `clips[i].label` |
 | Go vertical (Reels, TikTok, Shorts) | `showcase.json` → `output` `{ "width": 1080, "height": 1920 }`; with two clips also consider `"layout": "single"` since side by side is narrow in portrait |
-| 4K | `showcase.json` → `output` `{ "width": 3840, "height": 2160 }` |
+| Go landscape (YouTube, website hero) | `showcase.json` → `output` `{ "width": 1920, "height": 1080 }` |
+| 4K | `showcase.json` → `output` `{ "width": 3840, "height": 2160 }` (landscape) or `{ "width": 2160, "height": 2700 }` (4:5) |
 | Show only one of two clips | Remove the other entry from `clips` (layout falls back to `single`) |
 | Longer or shorter fades | `showcase.json` → `intro` / `outro` |
 | Keep the audio | `showcase.json` → `clips[i].muted: false` |
