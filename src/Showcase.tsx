@@ -8,7 +8,11 @@ import { ClipVideo } from "./ClipVideo";
 import { DeviceFrame } from "./devices/DeviceFrame";
 import { getBodyAspect, getGeometry } from "./devices/geometry";
 import { parseShowcase } from "./loadConfig";
-import { isResolvedShowcase, type ResolvedClip, type ResolvedShowcase } from "./probe";
+import {
+  isResolvedShowcase,
+  type ResolvedClip,
+  type ResolvedShowcase,
+} from "./probe";
 import type { ClipConfig, ShowcaseInput } from "./schema";
 
 const LABEL_FONT =
@@ -24,9 +28,8 @@ const isResolved = (clip: ClipConfig): clip is ResolvedClip =>
  * are sized with a phone aspect and play for the whole body of the video.
  */
 export const Showcase: React.FC<ShowcaseInput> = (props) => {
-  const config: ResolvedShowcase | ReturnType<typeof parseShowcase> = isResolvedShowcase(props)
-    ? props
-    : parseShowcase(props);
+  const config: ResolvedShowcase | ReturnType<typeof parseShowcase> =
+    isResolvedShowcase(props) ? props : parseShowcase(props);
   const frame = useCurrentFrame();
   const { width, height, fps, durationInFrames } = useVideoConfig();
 
@@ -46,7 +49,9 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
   const maxWidthPerDevice = (width * 0.84 - gap * (count - 1)) / count;
 
   const clips = config.clips.slice(0, count).map((clip) => {
-    const sourceAspect = isResolved(clip) ? clip.sourceWidth / clip.sourceHeight : 9 / 19.5;
+    const sourceAspect = isResolved(clip)
+      ? clip.sourceWidth / clip.sourceHeight
+      : 9 / 19.5;
     const bodyAspect = getBodyAspect(clip.device, sourceAspect);
     const bodyHeight = Math.min(maxHeight, maxWidthPerDevice / bodyAspect);
     const geometry = getGeometry(clip.device, bodyHeight, sourceAspect);
@@ -91,8 +96,16 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
               gap: labelFontSize * 1.2,
             }}
           >
-            <DeviceFrame geometry={geometry} shadow={config.shadow} scale={scale}>
-              <ClipVideo clip={clip} startFrame={introFrames} clipFrames={clipFrames} />
+            <DeviceFrame
+              geometry={geometry}
+              shadow={config.shadow}
+              scale={scale}
+            >
+              <ClipVideo
+                clip={clip}
+                startFrame={introFrames}
+                clipFrames={clipFrames}
+              />
             </DeviceFrame>
             {hasLabels ? (
               <div

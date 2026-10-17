@@ -21,7 +21,11 @@ type Props = {
  * the clip ends its last frame is held, so a shorter clip never unmounts
  * while a longer one is still playing.
  */
-export const ClipVideo: React.FC<Props> = ({ clip, startFrame, clipFrames }) => {
+export const ClipVideo: React.FC<Props> = ({
+  clip,
+  startFrame,
+  clipFrames,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 

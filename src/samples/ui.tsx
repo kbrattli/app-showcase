@@ -46,7 +46,12 @@ export const StatusBar: React.FC<{ readonly dark?: boolean }> = ({ dark }) => {
           {[18, 26, 34, 42].map((h) => (
             <div
               key={h}
-              style={{ width: 10, height: h, borderRadius: 3, background: color }}
+              style={{
+                width: 10,
+                height: h,
+                borderRadius: 3,
+                background: color,
+              }}
             />
           ))}
         </div>

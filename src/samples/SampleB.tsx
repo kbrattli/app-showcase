@@ -1,15 +1,25 @@
-import {
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { Screen, StatusBar } from "./ui";
 
 const ITEMS = [
-  { name: "Oat latte", meta: "Large · Extra shot", price: "$6.50", color: "#D9B99B" },
-  { name: "Almond croissant", meta: "Warmed", price: "$4.75", color: "#F3D9A4" },
-  { name: "Cold brew", meta: "16 oz · Black", price: "$5.25", color: "#6B4F3A" },
+  {
+    name: "Oat latte",
+    meta: "Large · Extra shot",
+    price: "$6.50",
+    color: "#D9B99B",
+  },
+  {
+    name: "Almond croissant",
+    meta: "Warmed",
+    price: "$4.75",
+    color: "#F3D9A4",
+  },
+  {
+    name: "Cold brew",
+    meta: "16 oz · Black",
+    price: "$5.25",
+    color: "#6B4F3A",
+  },
 ];
 
 /** "Checkout" screen: cart, a button press, then a success state. 8 s. */
@@ -27,10 +37,15 @@ export const SampleB: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
 
-  const cartOpacity = interpolate(frame, [successAt - 6, successAt + 6], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const cartOpacity = interpolate(
+    frame,
+    [successAt - 6, successAt + 6],
+    [1, 0],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    },
+  );
 
   const check = spring({
     frame: frame - successAt,
@@ -57,7 +72,14 @@ export const SampleB: React.FC = () => {
         <div style={{ fontSize: 88, fontWeight: 800, letterSpacing: -2 }}>
           Your cart
         </div>
-        <div style={{ marginTop: 60, display: "flex", flexDirection: "column", gap: 44 }}>
+        <div
+          style={{
+            marginTop: 60,
+            display: "flex",
+            flexDirection: "column",
+            gap: 44,
+          }}
+        >
           {ITEMS.map((item, i) => {
             const enter = spring({
               frame: frame - i * 5,
@@ -84,12 +106,18 @@ export const SampleB: React.FC = () => {
                   }}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 50, fontWeight: 700 }}>{item.name}</div>
-                  <div style={{ fontSize: 38, color: "#7A8090", marginTop: 10 }}>
+                  <div style={{ fontSize: 50, fontWeight: 700 }}>
+                    {item.name}
+                  </div>
+                  <div
+                    style={{ fontSize: 38, color: "#7A8090", marginTop: 10 }}
+                  >
                     {item.meta}
                   </div>
                 </div>
-                <div style={{ fontSize: 48, fontWeight: 600 }}>{item.price}</div>
+                <div style={{ fontSize: 48, fontWeight: 600 }}>
+                  {item.price}
+                </div>
               </div>
             );
           })}

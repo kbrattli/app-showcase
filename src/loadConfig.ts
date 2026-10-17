@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { showcaseSchema, type ShowcaseConfig, type ShowcaseInput } from "./schema";
+import {
+  showcaseSchema,
+  type ShowcaseConfig,
+  type ShowcaseInput,
+} from "./schema";
 
 export class ShowcaseConfigError extends Error {
   constructor(message: string) {
@@ -29,7 +33,8 @@ export const parseShowcase = (raw: unknown): ShowcaseConfig => {
   const result = showcaseSchema.safeParse(raw);
   if (!result.success) {
     const lines = result.error.issues.map(
-      (issue: z.core.$ZodIssue) => `  • ${formatPath(issue.path)}: ${issue.message}`,
+      (issue: z.core.$ZodIssue) =>
+        `  • ${formatPath(issue.path)}: ${issue.message}`,
     );
     throw new ShowcaseConfigError(
       [
@@ -45,7 +50,8 @@ export const parseShowcase = (raw: unknown): ShowcaseConfig => {
   const parsed = result.data;
   return {
     ...parsed,
-    layout: parsed.layout ?? (parsed.clips.length > 1 ? "sideBySide" : "single"),
+    layout:
+      parsed.layout ?? (parsed.clips.length > 1 ? "sideBySide" : "single"),
   };
 };
 

@@ -14,12 +14,18 @@ type Props = {
  * a dynamic island (iphone) or hole punch (android). `children` is rendered
  * inside the screen area, clipped to its rounded corners.
  */
-export const DeviceFrame: React.FC<Props> = ({ geometry: g, shadow, scale, children }) => {
+export const DeviceFrame: React.FC<Props> = ({
+  geometry: g,
+  shadow,
+  scale,
+  children,
+}) => {
   const dropShadow = shadow.enabled
     ? `0 ${shadow.offsetY * scale}px ${shadow.blur * scale}px rgba(0, 0, 0, ${shadow.opacity})`
     : null;
   const edgeRing = g.edge > 0 ? `inset 0 0 0 ${g.edge}px ${g.edgeColor}` : null;
-  const boxShadow = [edgeRing, dropShadow].filter(Boolean).join(", ") || undefined;
+  const boxShadow =
+    [edgeRing, dropShadow].filter(Boolean).join(", ") || undefined;
 
   return (
     <div

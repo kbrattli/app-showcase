@@ -18,7 +18,7 @@ export const clipSchema = z
   .object({
     src: z
       .string()
-      .min(1, "src must be a file name inside public/, e.g. \"recording.mp4\"")
+      .min(1, 'src must be a file name inside public/, e.g. "recording.mp4"')
       .describe("File name inside public/"),
     trimStart: z
       .number()
@@ -70,7 +70,11 @@ export const showcaseSchema = z.object({
     .describe("Defaults to sideBySide for two clips, single for one"),
   shadow: shadowSchema.prefault({}),
   intro: z.number().min(0).default(0.5).describe("Fade-in duration in seconds"),
-  outro: z.number().min(0).default(0.5).describe("Fade-out duration in seconds"),
+  outro: z
+    .number()
+    .min(0)
+    .default(0.5)
+    .describe("Fade-out duration in seconds"),
 });
 
 /** What a user writes in showcase.json (all defaults optional). */

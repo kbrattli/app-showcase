@@ -28,7 +28,9 @@ export type ResolvedShowcase = Omit<ShowcaseConfig, "clips"> & {
  * after calculateMetadata). zod strips unknown keys, so resolved props must
  * not be parsed again.
  */
-export const isResolvedShowcase = (props: unknown): props is ResolvedShowcase => {
+export const isResolvedShowcase = (
+  props: unknown,
+): props is ResolvedShowcase => {
   if (typeof props !== "object" || props === null) {
     return false;
   }
