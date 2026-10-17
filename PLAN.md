@@ -59,36 +59,36 @@ Moved ahead of the metadata/device work because headings 4–7 need real video f
 
 ## 5. Device frames (CSS only)
 
-- [ ] Create `src/devices/DeviceFrame.tsx` taking `device`, `screenWidth`, `screenHeight`, `shadow`, and `children`. Body: rounded rectangle, thin bezel, screen area with matching rounded corners and `overflow: hidden`.
+- [x] Create `src/devices/DeviceFrame.tsx` taking `device`, `screenWidth`, `screenHeight`, `shadow`, and `children`. Body: rounded rectangle, thin bezel, screen area with matching rounded corners and `overflow: hidden`.
   - Verify: `npx tsc --noEmit` passes.
-- [ ] Add `iphone` variant: dynamic island (pill) centered at top of screen, side buttons (volume up/down left, power right) drawn as thin rounded rects outside the body edge.
+- [x] Add `iphone` variant: dynamic island (pill) centered at top of screen, side buttons (volume up/down left, power right) drawn as thin rounded rects outside the body edge.
   - Verify: render a single frame with `npx remotion still src/index.ts Showcase out/iphone.png --props=examples/single.json` and inspect the image.
-- [ ] Add `android` variant: centered hole-punch camera at top, power and volume buttons on the right edge, slightly tighter corner radius than iPhone.
+- [x] Add `android` variant: centered hole-punch camera at top, power and volume buttons on the right edge, slightly tighter corner radius than iPhone.
   - Verify: temporary props with `device: 'android'`, render a still, inspect.
-- [ ] Add `none` variant: no frame, video shown with the same rounded-corner clipping and shadow.
+- [x] Add `none` variant: no frame, video shown with the same rounded-corner clipping and shadow.
   - Verify: temporary props with `device: 'none'`, render a still, inspect.
-- [ ] Shadow: apply `filter: drop-shadow(0 ${offsetY}px ${blur}px rgba(0,0,0,${opacity}))` on the device wrapper; omit entirely when `enabled` is false.
+- [x] Shadow: `box-shadow: 0 ${offsetY*s}px ${blur*s}px rgba(0,0,0,${opacity})` on the device body (follows the rounded corners); omitted entirely when `enabled` is false. `s = min(width, height) / 1080` so the 1080p values scale with resolution.
   - Verify: render stills with `shadow.enabled` true and false and confirm the difference visually.
-- [ ] Scale: all device dimensions derive from `output.height` (device height ≈ 72% of frame height in `single`, ≈ 68% in `sideBySide`; in vertical outputs cap by width instead). No fixed pixel sizes.
+- [x] Scale: all device dimensions derive from the frame (device height ≤ 76% of frame height in `single`, ≤ 72% in `sideBySide`, minus room for labels; also capped by 84% of frame width shared between devices, which is what limits vertical outputs). No fixed pixel sizes. `none` uses the recording's own aspect ratio, read by the probe.
   - Verify: `npx remotion still` at 1920x1080, 1080x1920 (via `examples/single.json` with `output` overridden), and 3840x2160; phones are proportionally the same size in each image.
 
 ## 6. Video playback
 
-- [ ] Create `src/ClipVideo.tsx` rendering `OffthreadVideo` with `src={staticFile(clip.src)}`, `trimBefore` and `durationInFrames` converted from seconds to frames (`trimAfter`, `startFrom` and `endAt` are marked `@deprecated` in `node_modules/remotion/dist/cjs/video/props.d.ts`).
+- [x] Create `src/ClipVideo.tsx` rendering `OffthreadVideo` with `src={staticFile(clip.src)}`, `trimBefore` and `durationInFrames` converted from seconds to frames (`trimAfter`, `startFrom` and `endAt` are marked `@deprecated` in `node_modules/remotion/dist/cjs/video/props.d.ts`).
   - Verify: `grep -n "trimBefore\|trimAfter\|startFrom\|endAt" node_modules/remotion/dist/cjs/video/props.d.ts` confirms `trimBefore` and `durationInFrames` are not deprecated and `trimAfter` is.
-- [ ] Video fills the screen area with `objectFit: 'cover'`, centered, so mismatched aspect ratios are cropped, never stretched.
-  - Verify: render a still with a deliberately 1:1 test video and confirm no distortion.
-- [ ] Wrap each clip in `Sequence` so a shorter clip holds its last frame (or fades) instead of unmounting early while the longer clip plays.
-  - Verify: render the default config; no Remotion warning about unmounted video or missing duration in the render log.
+- [x] Video fills the screen area with `objectFit: 'cover'`, centered, so mismatched aspect ratios are cropped, never stretched.
+  - Verify: render a still with a deliberately 1:1 test video (`npx remotion ffmpeg` crop of sample-a) and confirm no distortion. Done: cover-cropped inside the iPhone, shown square with `device: none`.
+- [x] Wrap each clip in `<Freeze frame={clamp(frame - introFrames, 0, clipFrames - 1)}>` so it holds its first frame during the intro and its last frame after it ends, instead of unmounting early while the longer clip plays. (`Freeze` is Remotion's tool for holding a frame; a plain `Sequence` would unmount.)
+  - Verify: render the default config; no Remotion warning about unmounted video or missing duration in the render log. Done; also pinned `zod` to 4.5.4 via `npx remotion add zod` to silence Remotion's version-mismatch warning.
 
 ## 7. Layout and transitions
 
-- [ ] Create `src/Showcase.tsx`: flat `background` fill over the whole frame via `AbsoluteFill`; `single` centers one device; `sideBySide` centers two devices with a gap of ≈ 6% of frame width.
+- [x] Create `src/Showcase.tsx`: flat `background` fill over the whole frame via `AbsoluteFill`; `single` centers one device; `sideBySide` centers two devices with a gap of ≈ 6% of frame width.
   - Verify: stills for both layouts look centered with even margins.
-- [ ] Optional `label` under each device: system sans-serif, size relative to `output.height`, color `#111`, centered.
+- [x] Optional `label` under each device: system sans-serif, size relative to `output.height`, color `#111`, centered.
   - Verify: still with labels set on both clips shows text under each phone.
-- [ ] Intro and outro fades: opacity from 0 to 1 over `intro` seconds using `interpolate` with clamping, and 1 to 0 over the final `outro` seconds.
-  - Verify: stills at frame 0, frame `intro*fps`, and the last frame show opacity 0, 1, and 0 respectively.
+- [x] Intro and outro fades: opacity from 0 to 1 over `intro` seconds using `interpolate` with clamping, and 1 to 0 over the final `outro` seconds.
+  - Verify: stills at frame 0, frame `intro*fps`, and the last frame show opacity 0, 1, and 0 respectively. Done (frames 0, 15, 209 of the default config).
 
 ## 8. Scripts
 
