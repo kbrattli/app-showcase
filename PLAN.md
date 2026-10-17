@@ -21,30 +21,43 @@ Environment at planning time: Node v24.21.0, npm 11.19.0, Remotion 4.0.536 (late
 
 ## 2. Schema and config loading
 
-- [ ] Create `src/schema.ts` with a zod schema for `showcase.json`:
+- [x] Create `src/schema.ts` with a zod schema for `showcase.json`:
   - `output`: `{ width, height, fps }`, defaults 1920 / 1080 / 30.
   - `background`: hex color string, default `#FFFFFF`, validated with `zColor` from `@remotion/zod-types`.
-  - `clips`: array of 1–2 `{ src, trimStart, trimEnd, device: 'iphone' | 'android' | 'none', label? }`; `trimEnd > trimStart`, both `>= 0`.
+  - `clips`: array of 1–2 `{ src, trimStart, trimEnd, device: 'iphone' | 'android' | 'none', label? }`; `trimEnd > trimStart`, both `>= 0`. `trimEnd` is optional: when omitted the clip plays to the end of the file (resolved in `calculateMetadata`).
   - `layout`: `'single' | 'sideBySide'`, optional; derived default is `sideBySide` when two clips are present, otherwise `single`.
   - `shadow`: `{ enabled: true, blur: 40, offsetY: 20, opacity: 0.18 }` defaults (soft, subtle).
   - `intro`, `outro`: seconds, default 0.5.
   - Export the inferred `ShowcaseProps` type.
   - Verify: `npx tsc --noEmit` passes.
-- [ ] Create `src/loadConfig.ts` that parses an object with the schema and, on failure, throws an `Error` whose message lists each bad field path and reason in plain language (no raw zod dump).
+- [x] Create `src/loadConfig.ts` that parses an object with the schema and, on failure, throws an `Error` whose message lists each bad field path and reason in plain language (no raw zod dump).
   - Verify: a scratch script feeding `{ clips: [] }` and `{ clips: [{ src: 'x.mp4', trimStart: 5, trimEnd: 2 }] }` prints readable messages naming `clips` and `trimEnd`.
-- [ ] Create root `showcase.json` (two sample clips, side by side, white background, default shadow) and `examples/single.json` (one clip, `single` layout).
+- [x] Create root `showcase.json` (two sample clips, side by side, white background, default shadow) and `examples/single.json` (one clip, `single` layout).
   - Verify: both parse without error through `loadConfig` in the scratch script.
-- [ ] In `src/Root.tsx`, read `showcase.json` as `defaultProps` for a `Showcase` composition with `schema` set to the zod schema, so Remotion Studio shows an editable props panel.
+- [x] In `src/Root.tsx`, read `showcase.json` as `defaultProps` for a `Showcase` composition with `schema` set to the zod schema, so Remotion Studio shows an editable props panel.
   - Verify: `npx remotion compositions src/index.ts` lists `Showcase` with no errors.
 
-## 3. Duration and metadata
+## 3. Sample recordings
+
+Moved ahead of the metadata/device work because headings 4–7 need real video files to verify against.
+
+- [ ] Create `src/samples/SampleA.tsx` and `SampleB.tsx`: simple animated fake app screens (header, list cards sliding in, a button press) at 1170x2532, 30 fps, 6 s and 8 s.
+  - Verify: `npx tsc --noEmit` passes.
+- [ ] Register both as compositions in a separate `src/samples/index.ts` entry so they do not appear in the main Studio list.
+  - Verify: `npx remotion compositions src/samples/index.ts` lists `SampleA` and `SampleB`.
+- [ ] Add `npm run samples` script rendering both to `public/sample-a.mp4` and `public/sample-b.mp4` with `--crf 28` to keep them small.
+  - Verify: `ls -la public/*.mp4` shows both files under 3 MB each.
+- [ ] Commit the two MP4s so a fresh clone renders without running `npm run samples`.
+  - Verify: `git ls-files public/` lists both MP4s.
+
+## 4. Duration and metadata
 
 - [ ] Implement `calculateMetadata` in `src/Root.tsx`: `durationInFrames = ceil((max(trimEnd - trimStart) + intro + outro) * fps)`, and set `width`, `height`, `fps` from `output`. Never hardcode the duration.
   - Verify: `npx remotion compositions src/index.ts` reports the expected duration for the default config (longest clip + 1 s at 30 fps).
 - [ ] Inside `calculateMetadata`, check each `clips[].src` exists under `public/` (use `staticFile` plus a `fetch` HEAD, or `fs.existsSync` on the Node side) and throw a readable error naming the missing file.
   - Verify: temporarily point `examples/single.json` at `missing.mp4` and confirm `npx remotion render ... --props=examples/single.json` fails with a message that names `missing.mp4`; then revert.
 
-## 4. Device frames (CSS only)
+## 5. Device frames (CSS only)
 
 - [ ] Create `src/devices/DeviceFrame.tsx` taking `device`, `screenWidth`, `screenHeight`, `shadow`, and `children`. Body: rounded rectangle, thin bezel, screen area with matching rounded corners and `overflow: hidden`.
   - Verify: `npx tsc --noEmit` passes.
@@ -59,7 +72,7 @@ Environment at planning time: Node v24.21.0, npm 11.19.0, Remotion 4.0.536 (late
 - [ ] Scale: all device dimensions derive from `output.height` (device height ≈ 72% of frame height in `single`, ≈ 68% in `sideBySide`; in vertical outputs cap by width instead). No fixed pixel sizes.
   - Verify: `npx remotion still` at 1920x1080, 1080x1920 (via `examples/single.json` with `output` overridden), and 3840x2160; phones are proportionally the same size in each image.
 
-## 5. Video playback
+## 6. Video playback
 
 - [ ] Create `src/ClipVideo.tsx` rendering `OffthreadVideo` with `src={staticFile(clip.src)}`, `trimBefore` and `durationInFrames` converted from seconds to frames (`trimAfter`, `startFrom` and `endAt` are marked `@deprecated` in `node_modules/remotion/dist/cjs/video/props.d.ts`).
   - Verify: `grep -n "trimBefore\|trimAfter\|startFrom\|endAt" node_modules/remotion/dist/cjs/video/props.d.ts` confirms `trimBefore` and `durationInFrames` are not deprecated and `trimAfter` is.
@@ -68,7 +81,7 @@ Environment at planning time: Node v24.21.0, npm 11.19.0, Remotion 4.0.536 (late
 - [ ] Wrap each clip in `Sequence` so a shorter clip holds its last frame (or fades) instead of unmounting early while the longer clip plays.
   - Verify: render the default config; no Remotion warning about unmounted video or missing duration in the render log.
 
-## 6. Layout and transitions
+## 7. Layout and transitions
 
 - [ ] Create `src/Showcase.tsx`: flat `background` fill over the whole frame via `AbsoluteFill`; `single` centers one device; `sideBySide` centers two devices with a gap of ≈ 6% of frame width.
   - Verify: stills for both layouts look centered with even margins.
@@ -76,17 +89,6 @@ Environment at planning time: Node v24.21.0, npm 11.19.0, Remotion 4.0.536 (late
   - Verify: still with labels set on both clips shows text under each phone.
 - [ ] Intro and outro fades: opacity from 0 to 1 over `intro` seconds using `interpolate` with clamping, and 1 to 0 over the final `outro` seconds.
   - Verify: stills at frame 0, frame `intro*fps`, and the last frame show opacity 0, 1, and 0 respectively.
-
-## 7. Sample recordings
-
-- [ ] Create `src/samples/SampleA.tsx` and `SampleB.tsx`: simple animated fake app screens (header, list cards sliding in, a button press) at 1170x2532, 30 fps, 6 s and 8 s.
-  - Verify: `npx tsc --noEmit` passes.
-- [ ] Register both as compositions in a separate `src/samples/index.ts` entry so they do not appear in the main Studio list.
-  - Verify: `npx remotion compositions src/samples/index.ts` lists `SampleA` and `SampleB`.
-- [ ] Add `npm run samples` script rendering both to `public/sample-a.mp4` and `public/sample-b.mp4` with `--crf 28` to keep them small.
-  - Verify: `ls -la public/*.mp4` shows both files under 3 MB each.
-- [ ] Commit the two MP4s so a fresh clone renders without running `npm run samples`.
-  - Verify: `git ls-files public/` lists both MP4s.
 
 ## 8. Scripts
 

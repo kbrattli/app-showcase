@@ -1,0 +1,24 @@
+{
+  "output": { "width": 1920, "height": 1080, "fps": 30 },
+  "background": "#FFFFFF",
+  "clips": [
+    {
+      "src": "sample-a.mp4",
+      "trimStart": 0.5,
+      "trimEnd": 5.5,
+      "device": "iphone",
+      "label": "Browse"
+    },
+    {
+      "src": "sample-b.mp4",
+      "trimStart": 1,
+      "trimEnd": 7,
+      "device": "android",
+      "label": "Checkout"
+    }
+  ],
+  "layout": "sideBySide",
+  "shadow": { "enabled": true, "blur": 40, "offsetY": 20, "opacity": 0.18 },
+  "intro": 0.5,
+  "outro": 0.5
+}

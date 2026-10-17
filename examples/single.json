@@ -1,0 +1,16 @@
+{
+  "output": { "width": 1920, "height": 1080, "fps": 30 },
+  "background": "#FFFFFF",
+  "clips": [
+    {
+      "src": "sample-a.mp4",
+      "trimStart": 0,
+      "trimEnd": 6,
+      "device": "iphone"
+    }
+  ],
+  "layout": "single",
+  "shadow": { "enabled": true, "blur": 40, "offsetY": 20, "opacity": 0.18 },
+  "intro": 0.5,
+  "outro": 0.5
+}
