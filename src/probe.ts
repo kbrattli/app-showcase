@@ -8,10 +8,42 @@ export type ResolvedClip = ClipConfig & {
   trimEnd: number;
   /** Duration of the source file in seconds, for reference. */
   sourceDurationInSeconds: number;
+  /** Pixel size of the source video; used to size the `none` device. */
+  sourceWidth: number;
+  sourceHeight: number;
+};
+
+export type ClipProbe = {
+  durationInSeconds: number;
+  width: number;
+  height: number;
 };
 
 export type ResolvedShowcase = Omit<ShowcaseConfig, "clips"> & {
   clips: ResolvedClip[];
+};
+
+/**
+ * True when props have already been through `resolveClips()` (as they are
+ * after calculateMetadata). zod strips unknown keys, so resolved props must
+ * not be parsed again.
+ */
+export const isResolvedShowcase = (props: unknown): props is ResolvedShowcase => {
+  if (typeof props !== "object" || props === null) {
+    return false;
+  }
+  const candidate = props as Partial<ResolvedShowcase>;
+  return (
+    typeof candidate.layout === "string" &&
+    Array.isArray(candidate.clips) &&
+    candidate.clips.length > 0 &&
+    candidate.clips.every(
+      (clip) =>
+        typeof clip.sourceWidth === "number" &&
+        typeof clip.sourceHeight === "number" &&
+        typeof clip.trimEnd === "number",
+    )
+  );
 };
 
 const toAbsoluteUrl = (path: string): string => {
@@ -33,11 +65,11 @@ const fileNotFound = (src: string): ShowcaseConfigError =>
     ].join("\n"),
   );
 
-/** Reads the duration of a file in public/, failing readably if it is missing. */
-export const probeClipDuration = async (
+/** Reads duration and size of a file in public/, failing readably if missing. */
+export const probeClip = async (
   src: string,
   signal?: AbortSignal,
-): Promise<number> => {
+): Promise<ClipProbe> => {
   const url = toAbsoluteUrl(staticFile(src));
 
   const head = await fetch(url, { method: "HEAD", signal }).catch(() => null);
@@ -47,7 +79,16 @@ export const probeClipDuration = async (
 
   const input = new Input({ formats: ALL_FORMATS, source: new UrlSource(url) });
   try {
-    return await input.computeDuration();
+    const durationInSeconds = await input.computeDuration();
+    const track = await input.getPrimaryVideoTrack();
+    if (!track) {
+      throw new Error("no video track");
+    }
+    return {
+      durationInSeconds,
+      width: track.displayWidth,
+      height: track.displayHeight,
+    };
   } catch (err) {
     throw new ShowcaseConfigError(
       `Video file "${src}" could not be read as a video (${(err as Error).message}). ` +
@@ -65,7 +106,8 @@ export const resolveClips = async (
 ): Promise<ResolvedShowcase> => {
   const clips = await Promise.all(
     config.clips.map(async (clip, index): Promise<ResolvedClip> => {
-      const sourceDurationInSeconds = await probeClipDuration(clip.src, signal);
+      const probe = await probeClip(clip.src, signal);
+      const sourceDurationInSeconds = probe.durationInSeconds;
       const trimEnd = clip.trimEnd ?? sourceDurationInSeconds;
       const where = `clips[${index}]`;
 
@@ -87,6 +129,8 @@ export const resolveClips = async (
         ...clip,
         trimEnd: Math.min(trimEnd, sourceDurationInSeconds),
         sourceDurationInSeconds,
+        sourceWidth: probe.width,
+        sourceHeight: probe.height,
       };
     }),
   );

@@ -35,6 +35,10 @@ export const clipSchema = z
       .string()
       .optional()
       .describe("Optional caption shown under the device"),
+    muted: z
+      .boolean()
+      .default(true)
+      .describe("Silence the recording's audio track (default true)"),
   })
   .refine(
     (clip) => clip.trimEnd === undefined || clip.trimEnd > clip.trimStart,
