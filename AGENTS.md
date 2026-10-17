@@ -109,6 +109,7 @@ to `showcase.json`, so make edits in the file.
 - Do not add image assets for device frames; they are drawn in CSS on purpose (license-free, editable).
 - Do not hardcode `durationInFrames`, `width`, `height` or `fps` anywhere; they come from `showcase.json` via `calculateMetadata`.
 - Do not use deprecated Remotion props (`startFrom`, `endAt`, `trimAfter`). Use `trimBefore` and `durationInFrames`.
+- Do not remove the Remotion license notice in `LICENSE` or `README.md`. The repo code is MIT, but Remotion itself is a separately licensed dependency (free up to three people, paid above).
 - Do not install ffmpeg or Python-based tooling; Remotion handles rendering. If you need ffmpeg for a one-off, `npx remotion ffmpeg` is bundled.
 
 ## Example prompts and the exact edits they should produce
