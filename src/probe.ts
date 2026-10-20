@@ -61,13 +61,14 @@ const toAbsoluteUrl = (path: string): string => {
 const fileNotFound = (src: string): ShowcaseConfigError =>
   new ShowcaseConfigError(
     [
-      `Video file "${src}" was not found in public/.`,
-      "Copy your screen recording into the public/ folder and reference it by",
-      `file name only, for example: "src": "${src.split("/").pop() ?? src}".`,
+      `Video file "${src}" was not found next to showcase.json.`,
+      "Copy the recording into the showcase folder (showcases/<name>/, or public/",
+      "for an example config) and reference it by file name only, for example:",
+      `"src": "${src.split("/").pop() ?? src}".`,
     ].join("\n"),
   );
 
-/** Reads duration and size of a file in public/, failing readably if missing. */
+/** Reads duration and size of a file in the public dir, failing readably if missing. */
 export const probeClip = async (
   src: string,
   signal?: AbortSignal,

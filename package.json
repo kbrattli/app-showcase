@@ -27,6 +27,7 @@
   },
   "scripts": {
     "studio": "remotion studio src/index.ts",
+    "new": "node scripts/new.mjs",
     "render": "node scripts/render.mjs",
     "samples": "node scripts/samples.mjs",
     "typecheck": "tsc --noEmit",

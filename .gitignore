@@ -10,3 +10,7 @@ out/
 public/*
 !public/sample-a.mp4
 !public/sample-b.mp4
+
+# Showcases made with this tool: recording, showcase.json and the rendered MP4 live
+# together in showcases/<name>/ and are never part of the repo.
+showcases/

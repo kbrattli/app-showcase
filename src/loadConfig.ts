@@ -25,7 +25,7 @@ const formatPath = (path: PropertyKey[]): string => {
 };
 
 /**
- * Validates the raw contents of showcase.json, applies defaults and resolves
+ * Validates the raw contents of a showcase.json, applies defaults and resolves
  * `layout`. Throws a ShowcaseConfigError listing every problem in plain
  * language instead of a raw zod dump.
  */
@@ -38,10 +38,10 @@ export const parseShowcase = (raw: unknown): ShowcaseConfig => {
     );
     throw new ShowcaseConfigError(
       [
-        "showcase.json is invalid:",
+        "The showcase config is invalid:",
         ...lines,
         "",
-        "Fix the file (or the one passed with --props) and run `npm run render` again.",
+        "Fix the showcase.json passed with --props and run `npm run render` again.",
         "Every field is documented in README.md.",
       ].join("\n"),
     );

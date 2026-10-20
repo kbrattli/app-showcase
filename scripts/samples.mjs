@@ -1,6 +1,6 @@
 // Renders the two sample screen recordings into public/.
 // Usage: npm run samples
-import { spawnSync } from "node:child_process";
+import { runRemotion } from "./remotion.mjs";
 
 const samples = [
   ["SampleA", "public/sample-a.mp4"],
@@ -8,12 +8,12 @@ const samples = [
 ];
 
 for (const [id, out] of samples) {
-  const result = spawnSync(
-    "npx",
-    ["remotion", "render", "src/samples/index.ts", id, out, "--crf=28"],
-    { stdio: "inherit", shell: process.platform === "win32" },
-  );
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
+  const status = runRemotion([
+    "render",
+    "src/samples/index.ts",
+    id,
+    out,
+    "--crf=28",
+  ]);
+  if (status !== 0) process.exit(status);
 }

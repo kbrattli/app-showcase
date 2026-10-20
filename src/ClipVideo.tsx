@@ -7,29 +7,45 @@ import {
 } from "remotion";
 import type { ClipConfig } from "./schema";
 
+/** One playback pass: the clips play from the start at `speed`. */
+export type PlaybackPass = {
+  /** First frame of the pass in the composition. */
+  readonly start: number;
+  /** Playback speed: 1 is normal, 0.5 is half speed. */
+  readonly speed: number;
+};
+
 type Props = {
   readonly clip: ClipConfig;
-  /** Frame at which the clip starts playing (after the intro fade). */
-  readonly startFrame: number;
-  /** How many frames of the clip are shown. */
-  readonly clipFrames: number;
+  /** Passes in order; the first starts after the intro fade. */
+  readonly passes: readonly PlaybackPass[];
+  /** How many seconds of the clip are shown (per pass, at speed 1). */
+  readonly clipSeconds: number;
 };
 
 /**
  * Plays the trimmed recording so that it fills its parent (the device screen)
- * with cover scaling. Before `startFrame` the first frame is held, and after
- * the clip ends its last frame is held, so a shorter clip never unmounts
- * while a longer one is still playing.
+ * with cover scaling. Each pass restarts the clip at its own speed. Before
+ * the first pass the first frame is held, and after a clip ends inside a
+ * pass its last frame is held, so a shorter clip never unmounts while a
+ * longer one is still playing.
  */
-export const ClipVideo: React.FC<Props> = ({
-  clip,
-  startFrame,
-  clipFrames,
-}) => {
+/** The pass that is playing at `frame`; the last pass holds until the end. */
+export const resolvePass = (
+  frame: number,
+  passes: readonly PlaybackPass[],
+): PlaybackPass =>
+  [...passes].reverse().find((candidate) => frame >= candidate.start) ??
+  passes[0];
+
+export const ClipVideo: React.FC<Props> = ({ clip, passes, clipSeconds }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const local = frame - startFrame;
+  const pass = resolvePass(frame, passes);
+  const clipFrames = Math.max(1, Math.round((clipSeconds / pass.speed) * fps));
+
+  const local = frame - pass.start;
   const shownFrame = Math.min(Math.max(local, 0), clipFrames - 1);
 
   return (
@@ -38,6 +54,7 @@ export const ClipVideo: React.FC<Props> = ({
         src={staticFile(clip.src)}
         trimBefore={Math.round(clip.trimStart * fps)}
         durationInFrames={clipFrames}
+        playbackRate={pass.speed}
         muted={clip.muted}
         style={{
           position: "absolute",

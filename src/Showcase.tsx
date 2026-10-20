@@ -4,7 +4,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { ClipVideo } from "./ClipVideo";
+import { ClipTimer } from "./ClipTimer";
+import { ClipVideo, type PlaybackPass } from "./ClipVideo";
 import { DeviceFrame } from "./devices/DeviceFrame";
 import { getBodyAspect, getGeometry } from "./devices/geometry";
 import { parseShowcase } from "./loadConfig";
@@ -37,17 +38,36 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
   const outroFrames = Math.round(config.outro * fps);
   const bodyFrames = Math.max(1, durationInFrames - introFrames - outroFrames);
 
+  // Each entry in `speeds` is one pass over the clips. Without resolved
+  // trims (Player fallback) the body is shared between the passes.
+  const speedFactor = config.speeds.reduce((sum, speed) => sum + 1 / speed, 0);
+  const clipSeconds = (clip: ClipConfig): number =>
+    clip.trimEnd === undefined
+      ? bodyFrames / fps / speedFactor
+      : clip.trimEnd - clip.trimStart;
+  const longestSeconds = Math.max(...config.clips.map(clipSeconds));
+  const passes: PlaybackPass[] = [];
+  let passStart = introFrames;
+  for (const speed of config.speeds) {
+    passes.push({ start: passStart, speed });
+    passStart += Math.max(1, Math.round((longestSeconds / speed) * fps));
+  }
+
   // Everything scales from the shorter side, so 1080x1920 matches 1920x1080.
   const scale = Math.min(width, height) / 1080;
   const hasLabels = config.clips.some((clip) => clip.label);
   const labelFontSize = 26 * scale;
   const labelBlock = hasLabels ? labelFontSize * 3 : 0;
+  const hasTimers = config.clips.some((clip) => clip.timer);
+  const timerFontSize = 34 * scale;
+  const timerBlock = hasTimers ? timerFontSize * 2.5 : 0;
 
   // The device fills most of the frame; the remaining margin leaves room for
   // the drop shadow and keeps the phone off the edges of the video.
   const count = config.layout === "sideBySide" ? config.clips.length : 1;
   const gap = count > 1 ? width * 0.05 : 0;
-  const maxHeight = height * (count > 1 ? 0.84 : 0.88) - labelBlock;
+  const maxHeight =
+    height * (count > 1 ? 0.84 : 0.88) - labelBlock - timerBlock;
   const maxWidthPerDevice = (width * 0.9 - gap * (count - 1)) / count;
 
   const clips = config.clips.slice(0, count).map((clip) => {
@@ -62,11 +82,7 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
       sourceAspect,
       clip.finish,
     );
-    const clipFrames =
-      clip.trimEnd === undefined
-        ? bodyFrames
-        : Math.max(1, Math.round((clip.trimEnd - clip.trimStart) * fps));
-    return { clip, geometry, clipFrames };
+    return { clip, geometry, seconds: clipSeconds(clip) };
   });
 
   const opacity = Math.min(
@@ -98,7 +114,7 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
             gap,
           }}
         >
-          {clips.map(({ clip, geometry, clipFrames }, index) => (
+          {clips.map(({ clip, geometry, seconds }, index) => (
             <div
               key={`${clip.src}-${index}`}
               style={{
@@ -106,18 +122,16 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: labelFontSize * 1.2,
+                justifyContent: "flex-end",
               }}
             >
+              {/* Captions share the column; `order` flips them above the phone. */}
               <DeviceFrame
                 geometry={geometry}
                 shadow={config.shadow}
                 scale={scale}
               >
-                <ClipVideo
-                  clip={clip}
-                  startFrame={introFrames}
-                  clipFrames={clipFrames}
-                />
+                <ClipVideo clip={clip} passes={passes} clipSeconds={seconds} />
               </DeviceFrame>
               {hasLabels ? (
                 <div
@@ -129,10 +143,19 @@ export const Showcase: React.FC<ShowcaseInput> = (props) => {
                     letterSpacing: -0.2,
                     textAlign: "center",
                     minHeight: labelFontSize * 1.3,
+                    order: config.labelPosition === "above" ? -1 : 1,
                   }}
                 >
                   {clip.label ?? ""}
                 </div>
+              ) : null}
+              {hasTimers ? (
+                <ClipTimer
+                  clip={clip}
+                  passes={passes}
+                  clipSeconds={seconds}
+                  fontSize={timerFontSize}
+                />
               ) : null}
             </div>
           ))}

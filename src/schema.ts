@@ -21,8 +21,10 @@ export const clipSchema = z
   .object({
     src: z
       .string()
-      .min(1, 'src must be a file name inside public/, e.g. "recording.mp4"')
-      .describe("File name inside public/"),
+      .min(1, 'src must be a file name next to showcase.json, e.g. "recording.mp4"')
+      .describe(
+        "File name of the recording next to showcase.json (inside public/ for the example configs)",
+      ),
     trimStart: z
       .number()
       .min(0, "trimStart must be 0 or more seconds")
@@ -48,6 +50,19 @@ export const clipSchema = z
       .boolean()
       .default(true)
       .describe("Silence the recording's audio track (default true)"),
+    timer: z
+      .object({
+        start: z.number().min(0).describe("Second in the recording where the stopwatch starts"),
+        end: z.number().min(0).describe("Second in the recording where the stopwatch stops"),
+      })
+      .refine((timer) => timer.end > timer.start, {
+        message: "timer.end must be greater than timer.start",
+        path: ["end"],
+      })
+      .optional()
+      .describe(
+        "Stopwatch under the device during slow-motion passes (speed below 1): counts the real milliseconds between two moments of the recording",
+      ),
   })
   .refine(
     (clip) => clip.trimEnd === undefined || clip.trimEnd > clip.trimStart,
@@ -102,6 +117,17 @@ export const showcaseSchema = z.object({
     .min(0)
     .default(0.5)
     .describe("Fade-out duration in seconds"),
+  speeds: z
+    .array(z.number().positive("each speed must be more than 0"))
+    .min(1, "speeds must contain at least one entry")
+    .default([1])
+    .describe(
+      "Playback passes. The clips play once per entry, back to back, at that speed: 1 is normal, 0.5 is half speed",
+    ),
+  labelPosition: z
+    .enum(["below", "above"])
+    .default("below")
+    .describe("Whether captions sit under or over the devices"),
 });
 
 /** What a user writes in showcase.json (all defaults optional). */

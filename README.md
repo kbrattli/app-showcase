@@ -19,13 +19,20 @@ change it without touching React code. Built with [Remotion](https://www.remotio
    git clone <this repo> app-showcase && cd app-showcase && npm install
    ```
 
-2. Drop your screen recordings into `public/` (MP4 with H.264 is the safe
-   choice) and point `showcase.json` at them:
+2. Start a showcase from your screen recording (MP4 with H.264 is the safe
+   choice):
+
+   ```bash
+   npm run new -- ~/Desktop/my-recording.mp4 --device iphone-15-pro
+   ```
+
+   This creates `showcases/my-recording/` with a copy of the recording and a
+   `showcase.json` you can edit, for example to trim and caption it:
 
    ```json
    {
      "clips": [
-       { "src": "my-recording.mp4", "trimStart": 2, "trimEnd": 9, "device": "iphone", "label": "Onboarding" }
+       { "src": "my-recording.mp4", "trimStart": 2, "trimEnd": 9, "device": "iphone-15-pro", "label": "Onboarding" }
      ]
    }
    ```
@@ -33,13 +40,16 @@ change it without touching React code. Built with [Remotion](https://www.remotio
 3. Render:
 
    ```bash
-   npm run render
+   npm run render -- my-recording
    ```
 
-   The video lands in `out/showcase.mp4`.
+   The video lands in `showcases/my-recording/showcase.mp4`.
 
-The repo ships with two generated sample recordings, so `npm run render`
-works straight after `npm install`.
+Everything under `showcases/` is git-ignored, so each video you make keeps
+its recording, its definition and its result together without ever showing
+up in `git status`. The repo ships with two generated sample recordings and
+`examples/sample.json`, so a plain `npm run render` works straight after
+`npm install` and writes `out/sample.mp4`.
 
 ### With an AI agent
 
@@ -48,8 +58,9 @@ Open the repo in Claude Code, Codex, Cursor or any agent that reads
 
 > Make an app showcase for this video, iPhone 15 Pro
 
-That is the whole job. The agent copies the recording into `public/`, picks
-the drawn model, renders, and gives you `out/showcase.mp4`. Every model is
+That is the whole job. The agent creates `showcases/<name>/` from the
+recording, picks the drawn model, renders, and gives you
+`showcases/<name>/showcase.mp4`, with no tracked file touched. Every model is
 drawn from its real dimensions, so you never need a bezel image or any other
 file to show what the phone looks like. Any model from the table below works
 ("Pixel 10 Pro", "Galaxy S25 Ultra", "black iPhone 16 Pro").
@@ -58,16 +69,17 @@ file to show what the phone looks like. Any model from the table below works
 
 | Command | What it does |
 | --- | --- |
-| `npm run studio` | Opens Remotion Studio for a live preview of `showcase.json`. |
-| `npm run render` | Renders `showcase.json` to `out/showcase.mp4`. |
-| `npm run render -- --props=examples/single.json` | Renders a different config. Keep as many configs as you like. |
-| `npm run render -- out/vertical.mp4 --props=my-vertical.json` | First positional argument is the output path. Other flags go to `remotion render`. |
+| `npm run new -- <video> [<video2>] [--name x] [--device id] [--finish colour]` | Creates `showcases/<name>/` with a copy of the recording(s) and a default `showcase.json`. Two videos give a side-by-side showcase. |
+| `npm run render -- <name>` | Renders `showcases/<name>/showcase.json` to `showcases/<name>/showcase.mp4`. `showcases/<name>` works too. |
+| `npm run render -- <name> other.mp4` | Second argument is the output path. Other flags go to `remotion render` as `--flag=value`. |
+| `npm run render` | Renders `examples/sample.json` to `out/sample.mp4` (fresh-clone smoke test). |
+| `npm run render -- examples/galaxy.json` | Renders an example config to `out/<name>.mp4`. Examples read recordings from `public/`. |
+| `npm run studio -- --props=showcases/<name>/showcase.json --public-dir=showcases/<name>` | Opens Remotion Studio for a live preview of that showcase. |
 | `npm run samples` | Regenerates the two sample recordings in `public/`. |
 | `npm run typecheck` | Runs `tsc --noEmit`. |
 
 In Studio, the props panel lets you preview changes, but it cannot write them
-back because the defaults come from `showcase.json`. Edit the JSON file
-directly; Studio reloads on save.
+back to the file. Edit `showcase.json` directly; Studio reloads on save.
 
 ## `showcase.json` fields
 
@@ -82,13 +94,14 @@ anything wrong, including a missing video file or a trim past the end of it.
 | `output.fps` | number | `30` | Frames per second. |
 | `background` | hex color | `"#FFFFFF"` | Flat color filling the whole frame. |
 | `clips` | array (1–2) | required | The recordings to show. |
-| `clips[].src` | string | required | File name inside `public/`, for example `"demo.mp4"`. |
+| `clips[].src` | string | required | File name of a recording next to the `showcase.json`, for example `"demo.mp4"`. Example configs read from `public/` instead. |
 | `clips[].trimStart` | seconds | `0` | Skip this much of the start of the recording. |
 | `clips[].trimEnd` | seconds | end of file | Stop the recording at this second. Must be greater than `trimStart` and within the file. |
 | `clips[].device` | model id, `"iphone"`, `"android"` or `"none"` | `"iphone"` | Phone drawn around the recording. Model ids: `iphone-17-pro`, `iphone-17`, `iphone-16-pro`, `iphone-16`, `iphone-15-pro`, `pixel-10-pro`, `pixel-9-pro`, `galaxy-s25`, `galaxy-s25-ultra`. `iphone` and `android` always mean the newest Pro model. `none` shows the recording with rounded corners and no frame, at its own aspect ratio. |
 | `clips[].finish` | string | first finish of the model | Body colour. See the finishes table below. |
 | `clips[].label` | string | none | Caption shown under the device. |
 | `clips[].muted` | boolean | `true` | Set to `false` to keep the recording's audio. |
+| `clips[].timer` | `{ "start": seconds, "end": seconds }` | none | Stopwatch under the device during slow-motion passes (any entry in `speeds` below 1). It counts the real milliseconds of the recording between the two moments, so a 300 ms animation shown at 0.25x counts to `300 ms` over 1.2 s. |
 | `layout` | `"single"` \| `"sideBySide"` | `sideBySide` for two clips, else `single` | How devices are arranged. |
 | `shadow.enabled` | boolean | `true` | Draw a drop shadow under each device. |
 | `shadow.blur` | px at 1080p | `40` | Shadow blur radius. Scales with output resolution. |
@@ -96,9 +109,11 @@ anything wrong, including a missing video file or a trim past the end of it.
 | `shadow.opacity` | 0–1 | `0.18` | Shadow darkness. Keep it low for a soft look. |
 | `intro` | seconds | `0.5` | Fade-in duration at the start. |
 | `outro` | seconds | `0.5` | Fade-out duration at the end. |
+| `speeds` | array of numbers | `[1]` | Playback passes. The clips play once per entry, back to back, at that speed: `[1, 0.5]` plays everything at normal speed, then again at half speed. |
+| `labelPosition` | `"below"` \| `"above"` | `"below"` | Put the captions under or over the devices. |
 
-The video's length is computed, not set: longest trimmed clip + `intro` +
-`outro`. A shorter clip holds its last frame while the longer one finishes.
+The video's length is computed, not set: the longest trimmed clip played once
+per entry in `speeds` (divided by that speed) + `intro` + `outro`. A shorter clip holds its last frame while the longer one finishes.
 Recordings whose aspect ratio does not match the device screen are scaled to
 cover and centered, never stretched.
 
@@ -124,13 +139,17 @@ the Pixels are 6.3" at 20:9 and the Galaxy S25 is 19.5:9.
 
 ### Examples
 
-- `showcase.json`: the default, both samples side by side with labels.
+- `examples/sample.json`: both samples side by side with labels (what a plain `npm run render` renders).
 - `examples/single.json`: one iPhone, centered.
 - `examples/models.json`: iPhone 17 Pro in cosmic orange next to a Pixel 10 Pro in porcelain.
 - `examples/galaxy.json`: one Galaxy S25 Ultra.
 
 ## How it works
 
+- `scripts/new.mjs` and `scripts/render.mjs` wrap the Remotion CLI. A
+  showcase folder is passed as Remotion's public dir, so recordings are
+  served from next to their `showcase.json` and nothing is copied into the
+  repo's tracked folders.
 - `src/schema.ts` is the zod schema for `showcase.json`; `src/loadConfig.ts`
   turns validation failures into readable errors.
 - `src/Root.tsx` registers the `Showcase` composition and uses

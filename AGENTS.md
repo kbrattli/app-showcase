@@ -1,24 +1,26 @@
 # Guide for AI agents working in app-showcase
 
-You are editing a Remotion project that turns mobile screen recordings into a
-showcase MP4. Almost every request can be satisfied by editing one JSON file.
-Read this whole file before changing anything.
+You are working in a Remotion project that turns mobile screen recordings into
+a showcase MP4. Every video the user makes lives in its own untracked folder
+under `showcases/`, and almost every request is satisfied by editing the
+`showcase.json` in that folder. Read this whole file before changing anything.
 
 ## This repo is a tool, not a gallery
 
 The user runs this project to produce a showcase video from their own
-recording. The recording, the edited `showcase.json` and the rendered MP4 are
-the user's work product for that session, not repository content.
+recording. The recording, its `showcase.json` and the rendered MP4 are the
+user's work product, not repository content. They all live together in
+`showcases/<name>/`, which `.gitignore` excludes completely.
 
-- Never commit, and never offer to commit, push or open a PR for: recordings
-  added to `public/`, changes to `showcase.json`, or anything in `out/`.
-  `.gitignore` already excludes recordings and `out/`; `showcase.json` is
-  tracked only so a fresh clone renders, and `git checkout showcase.json`
-  restores the sample config.
-- The deliverable is `out/showcase.mp4`. Hand it to the user when the render
-  is done, and end there. Do not ask about git.
+- A video request must leave `git status` clean. Never create, edit or delete
+  a tracked file to make a video: not `examples/*.json`, not `public/`, not
+  `src/`. Everything for the video goes in `showcases/<name>/`.
+- Never commit, and never offer to commit, push or open a PR for anything in
+  `showcases/`, `public/` or `out/`.
+- The deliverable is `showcases/<name>/showcase.mp4`. Hand it to the user when
+  the render is done, and end there. Do not ask about git.
 - Commit only when the user changes the tool itself (`src/`, `scripts/`,
-  docs, `.gitignore`) and asks for a commit.
+  `examples/`, docs, `.gitignore`) and asks for a commit.
 
 ## The one-line request
 
@@ -26,22 +28,29 @@ Most people will say something like **"Make an app showcase for this video,
 iPhone 15 Pro"** and nothing more. That sentence is a complete order. Do
 exactly this, without asking questions:
 
-1. Get the recording into `public/`. If the message came with a file or a
-   path, copy it there and keep the file name (replace spaces with `-`). If
-   it names a file that is already in `public/`, use that one. Ask only if
-   there is no file at all.
-2. Pick the model from the words in the request using the table below. Every
+1. Pick the model from the words in the request using the table below. Every
    phone is drawn from its real dimensions in `src/devices/models.ts`, so
    never ask for, search for or suggest a bezel image, a PNG, a mock-up or any
    other file to show what the phone looks like. The tool already knows.
-3. Write `showcase.json` with one clip and nothing the user did not ask for:
-   no `trimStart` / `trimEnd` (the whole recording plays), no `label`, no
-   `finish` unless a colour was named, default `output`, `background` and
-   `shadow`, and `"layout": "single"`.
-4. Run `npm run render`.
-5. Hand over `out/showcase.mp4` and stop. One request, one MP4: do not render
-   stills, other models or variants, and do not create `examples/*.json`,
-   unless asked.
+2. Create the showcase from the recording. If the message came with a file or
+   a path, pass it to `npm run new`; the script names the folder after the
+   file, copies the recording in (spaces become `-`) and writes a default
+   `showcase.json`. Ask only if there is no file at all.
+
+   ```bash
+   npm run new -- ~/Desktop/demo.mp4 --device iphone-15-pro
+   ```
+
+   This creates `showcases/demo/demo.mp4` and `showcases/demo/showcase.json`
+   with one clip and nothing the user did not ask for: no `trimStart` /
+   `trimEnd` (the whole recording plays), no `label`, no `finish` unless a
+   colour was named (`--finish black`), default `output`, `background` and
+   `shadow`, and `"layout": "single"`. If the user named the showcase, add
+   `--name <that>`. Do not edit the generated file unless the request asks
+   for more than a model and a colour.
+3. Run `npm run render -- demo` (the folder name).
+4. Hand over `showcases/demo/showcase.mp4` and stop. One request, one MP4: do
+   not render stills, other models or variants, unless asked.
 
 | They say | `clips[0].device` |
 | --- | --- |
@@ -62,10 +71,14 @@ A colour in the request ("black iPhone 15 Pro", "porcelain Pixel") becomes
 
 | Path | Purpose | Touch it? |
 | --- | --- | --- |
-| `showcase.json` | The video description. **This is the file to edit for nearly every request.** | Yes |
-| `examples/*.json` | Alternative configs. Render one with `npm run render -- --props=examples/<name>.json`. | Yes, add more as needed |
-| `public/` | Screen recordings go here. Referenced by file name only in `clips[].src`. Git-ignored except the two samples. | Add files; never commit them; do not delete `sample-a.mp4` / `sample-b.mp4` |
-| `out/` | Render output (`showcase.mp4`). Git-ignored. | Read only |
+| `showcases/<name>/` | One folder per video the user makes: the recording(s), `showcase.json` and the rendered `showcase.mp4`. Git-ignored. **This is where every video request happens.** | Yes; never commit it |
+| `showcases/<name>/showcase.json` | The video description. **This is the file to edit for nearly every request.** | Yes |
+| `examples/*.json` | Tracked demo configs that use the sample recordings in `public/`. Render one with `npm run render -- examples/<name>.json`. `sample.json` is the fresh-clone smoke test. | Only when changing the tool's examples, never for a user's video |
+| `public/` | The two sample recordings. Git-ignored except those two. | No; user recordings go in `showcases/<name>/` |
+| `out/` | Renders of example configs (`out/<name>.mp4`). Git-ignored. | Read only |
+| `scripts/new.mjs` | `npm run new`: creates a showcase folder from a recording. | No |
+| `scripts/render.mjs` | `npm run render`: renders a showcase folder or an example config. | No |
+| `scripts/remotion.mjs`, `scripts/samples.mjs` | Shared CLI runner; sample generator. | No |
 | `src/schema.ts` | zod schema of `showcase.json`, with defaults. | Only when adding a new field |
 | `src/loadConfig.ts` | Validation and readable error messages. | Rarely |
 | `src/Root.tsx` | Registers the composition; `calculateMetadata` derives size, fps and duration. | Rarely |
@@ -75,17 +88,19 @@ A colour in the request ("black iPhone 15 Pro", "porcelain Pixel") becomes
 | `src/devices/finishes.ts` | Colour palettes for the metal band. | To add or tune a finish |
 | `src/devices/PhoneSvg.tsx`, `src/devices/geometry.ts`, `src/devices/DeviceFrame.tsx` | Vector phone renderer and its geometry. | Only when asked to change how every phone looks |
 | `src/probe.ts` | Reads duration and size of each recording. | No |
-| `src/samples/`, `scripts/samples.mjs` | Generates the sample recordings. | No |
-| `scripts/render.mjs` | `npm run render` wrapper. | No |
+| `src/samples/` | Generates the sample recordings. | No |
 | `remotion.config.ts`, `tsconfig.json`, `package.json` | Build config. | No |
 | `PLAN.md` | Build history of this repo. | No |
 
 ## Where recordings go
 
-Copy the user's video into `public/` and reference it by file name:
-`"src": "my-recording.mp4"`. MP4 (H.264) is the safe format. If the user
-mentions a file that is not in `public/`, ask for it or tell them where to put
-it; do not invent a file name.
+Each showcase folder is its own Remotion public dir, so `clips[].src` is the
+file name of a recording **next to that `showcase.json`**:
+`"src": "my-recording.mp4"`. `npm run new` copies the recording there; to
+add a second recording to an existing showcase, copy it into the same folder
+(spaces in the name become `-`). MP4 (H.264) is the safe format. If the user
+mentions a file that is nowhere on disk, ask for it; do not invent a file
+name. Only `examples/*.json` read from `public/`.
 
 ## Every `showcase.json` field
 
@@ -96,13 +111,14 @@ it; do not invent a file name.
 | `output.fps` | number | `30` | Frames per second. |
 | `background` | hex color string | `"#FFFFFF"` | Flat color filling the frame. |
 | `clips` | array of 1–2 | required | Recordings to show. |
-| `clips[].src` | string | required | File name inside `public/`. |
+| `clips[].src` | string | required | File name of a recording next to `showcase.json`. |
 | `clips[].trimStart` | seconds | `0` | Skip the start of the recording. |
 | `clips[].trimEnd` | seconds | end of file | Stop here. Must exceed `trimStart` and fit in the file. |
 | `clips[].device` | model id, `"iphone"`, `"android"` or `"none"` | `"iphone"` | Phone model. Ids: `iphone-17-pro`, `iphone-17`, `iphone-16-pro`, `iphone-16`, `iphone-15-pro`, `pixel-10-pro`, `pixel-9-pro`, `galaxy-s25`, `galaxy-s25-ultra`. `iphone` = newest iPhone Pro, `android` = newest Pixel Pro. `none` = rounded rectangle, no frame, native aspect. |
 | `clips[].finish` | string | model's first finish | Body colour. iphone-17-pro: `silver`, `cosmic-orange`, `deep-blue`. iphone-17: `black`, `white`, `sage`, `lavender`, `mist-blue`. iphone-16-pro: `natural`, `black`, `white`, `desert`. iphone-16: `black`, `white`, `pink`, `teal`, `ultramarine`. iphone-15-pro: `natural`, `blue`, `white`, `black`. pixel-10-pro: `obsidian`, `porcelain`, `moonstone`, `jade`. pixel-9-pro: `obsidian`, `porcelain`, `hazel`, `rose-quartz`. galaxy-s25: `navy`, `icy-blue`, `mint`, `silver-shadow`. galaxy-s25-ultra: `titanium-silverblue`, `titanium-black`, `titanium-gray`, `titanium-whitesilver`. An invalid finish fails validation and lists the valid ones. |
 | `clips[].label` | string | none | Caption under the device. |
 | `clips[].muted` | boolean | `true` | `false` keeps the recording's audio. |
+| `clips[].timer` | `{ "start": s, "end": s }` | none | Stopwatch under the device during slow-motion passes (`speeds` entries below 1), counting real milliseconds of the recording between the two moments. |
 | `layout` | `"single"` \| `"sideBySide"` | `sideBySide` if two clips, else `single` | Arrangement. |
 | `shadow.enabled` | boolean | `true` | Drop shadow under devices. |
 | `shadow.blur` | number (px at 1080p) | `40` | Shadow softness. |
@@ -110,11 +126,17 @@ it; do not invent a file name.
 | `shadow.opacity` | 0–1 | `0.18` | Shadow darkness. |
 | `intro` | seconds | `0.5` | Fade-in length. |
 | `outro` | seconds | `0.5` | Fade-out length. |
+| `speeds` | array of numbers | `[1]` | Playback passes: the clips play once per entry, back to back, at that speed. `[1, 0.5]` = normal speed, then the same again at half speed. |
+| `labelPosition` | `"below"` \| `"above"` | `"below"` | Captions under or over the devices. |
 
-Duration is always computed: longest trimmed clip + `intro` + `outro`. Never
-try to set it directly.
+Duration is always computed: longest trimmed clip, played once per entry in
+`speeds` (divided by that speed), + `intro` + `outro`. Never try to set it
+directly.
 
 ## Which file to touch for common requests
+
+`showcase.json` below always means `showcases/<name>/showcase.json`, the
+showcase the user is talking about (the most recent one if they do not say).
 
 | Request | Edit |
 | --- | --- |
@@ -127,10 +149,14 @@ try to set it directly.
 | Go vertical (Reels, TikTok, Shorts) | `showcase.json` → `output` `{ "width": 1080, "height": 1920 }`; with two clips also consider `"layout": "single"` since side by side is narrow in portrait |
 | Go landscape (YouTube, website hero) | `showcase.json` → `output` `{ "width": 1920, "height": 1080 }` |
 | 4K | `showcase.json` → `output` `{ "width": 3840, "height": 2160 }` (landscape) or `{ "width": 2160, "height": 2700 }` (4:5) |
+| Add a second recording ("show both side by side") | Copy it into the same folder, add a second `clips` entry, drop `"layout": "single"` (or run `npm run new -- a.mp4 b.mp4 --name <name>` for a fresh pair) |
 | Show only one of two clips | Remove the other entry from `clips` (layout falls back to `single`) |
 | Longer or shorter fades | `showcase.json` → `intro` / `outro` |
+| Replay in slow motion ("play it again at half speed") | `showcase.json` → `speeds` `[1, 0.5]` (`[0.5]` alone plays only the slow version) |
+| Caption above the phone instead of below | `showcase.json` → `labelPosition: "above"` |
+| Time an animation ("show how long the mount takes") | `showcase.json` → `clips[i].timer` `{ "start", "end" }` in recording seconds, plus a slow entry in `speeds`. Find the frames by extracting them with `npx remotion ffmpeg` and looking |
 | Keep the audio | `showcase.json` → `clips[i].muted: false` |
-| Keep several variants | Copy `showcase.json` into `examples/<name>.json` and render with `--props` |
+| Keep several variants of one video ("also a vertical one") | A second showcase folder: `npm run new -- showcases/<name>/<recording>.mp4 --name <name>-vertical`, then edit its `showcase.json`. Never an `examples/*.json` |
 | Tune one model (bezel width, corner shape, button position, island size) | `src/devices/models.ts` only |
 | Add a phone model or a finish | `src/devices/models.ts` (+ `src/devices/finishes.ts` for a new palette), then the tables in `README.md`, `CLAUDE.md` and `AGENTS.md` |
 | Change how every phone is drawn (band, chamfer, glass) | `src/devices/PhoneSvg.tsx` only |
@@ -142,30 +168,38 @@ in `showcase.json`, and keep such changes small.
 ## How to verify
 
 ```bash
-npm run render
+npm run render -- <name>
 ```
 
-A valid config renders `out/showcase.mp4` with no errors. An invalid config
-fails fast with a message that names the field (or the missing file); fix
-that and run again. For a different config:
+A valid config renders `showcases/<name>/showcase.mp4` with no errors. An
+invalid config fails fast with a message that names the field (or the missing
+file); fix that and run again. The script also accepts `showcases/<name>` or
+a second argument for a different output path. For the tracked examples:
 
 ```bash
-npm run render -- --props=examples/single.json
+npm run render                              # examples/sample.json -> out/sample.mp4
+npm run render -- examples/galaxy.json      # -> out/galaxy.mp4
 ```
 
 After editing anything under `src/`, also run `npm run typecheck`. For a
 visual check without a full render, grab one frame:
 
 ```bash
-npx remotion still src/index.ts Showcase out/frame.png --frame=60 --props=showcase.json
+npx remotion still src/index.ts Showcase showcases/<name>/frame.png --frame=60 --props=showcases/<name>/showcase.json --public-dir=showcases/<name>
 ```
 
-`npm run studio` opens a live preview. Studio's props panel cannot save back
-to `showcase.json`, so make edits in the file.
+A live preview of a showcase:
+
+```bash
+npm run studio -- --props=showcases/<name>/showcase.json --public-dir=showcases/<name>
+```
+
+Studio's props panel cannot save back to the file, so make edits in
+`showcase.json`; Studio reloads on save.
 
 ## What not to touch
 
-- `public/sample-a.mp4` and `public/sample-b.mp4`: the repo must render on a fresh clone.
+- `public/sample-a.mp4`, `public/sample-b.mp4` and `examples/sample.json`: the repo must render on a fresh clone.
 - `src/probe.ts`, `scripts/`, `remotion.config.ts`, `tsconfig.json`, `package.json` dependencies and versions. All Remotion packages must stay on the same version; use `npx remotion upgrade` if an upgrade is explicitly requested.
 - Do not add raster artwork for device frames to the repo; phones are vector art drawn from `src/devices/models.ts` on purpose (license-free, editable, scales to 4K).
 - Do not hardcode `durationInFrames`, `width`, `height` or `fps` anywhere; they come from `showcase.json` via `calculateMetadata`.
@@ -177,13 +211,12 @@ to `showcase.json`, so make edits in the file.
 
 ### 1. "Make an app showcase for this video, iPhone 15 Pro." (with `~/Desktop/demo.mp4` attached)
 
-Copy the recording in, keeping its name:
-
 ```bash
-cp ~/Desktop/demo.mp4 public/demo.mp4
+npm run new -- ~/Desktop/demo.mp4 --device iphone-15-pro
 ```
 
-Replace `showcase.json` with exactly this:
+That creates `showcases/demo/demo.mp4` and `showcases/demo/showcase.json`
+containing exactly this:
 
 ```json
 {
@@ -197,11 +230,16 @@ Replace `showcase.json` with exactly this:
 }
 ```
 
-Run `npm run render` and hand over `out/showcase.mp4`. Nothing else: no still, no second model, no example file, no bezel image.
+Run `npm run render -- demo` and hand over `showcases/demo/showcase.mp4`.
+Nothing else: no still, no second model, no example file, no bezel image, and
+`git status` stays clean.
 
 ### 2. "Use my recording onboarding.mp4, skip the first 2 seconds and stop at 12, and call it Onboarding."
 
-Confirm `public/onboarding.mp4` exists. Then set `clips` to a single entry:
+Find `onboarding.mp4` (an attachment, a path in the message, or an existing
+`showcases/onboarding/` folder). If no showcase exists yet, run
+`npm run new -- <path to onboarding.mp4>`. Then set `clips` in
+`showcases/onboarding/showcase.json` to a single entry:
 
 ```json
 "clips": [
@@ -215,53 +253,52 @@ Confirm `public/onboarding.mp4` exists. Then set `clips` to a single entry:
 ]
 ```
 
-Remove `"layout": "sideBySide"` or set it to `"single"`. Run `npm run render`.
+Keep `"layout": "single"`. Run `npm run render -- onboarding`.
 
 ### 3. "Make the second phone an Android, turn the background light grey and make the shadow barely visible."
 
-Edit three places in `showcase.json`:
+Edit three places in the showcase's `showcase.json` (here `showcases/compare/`):
 
 ```json
 "background": "#F2F2F5",
 "clips": [
   { ...first clip unchanged... },
-  { "src": "sample-b.mp4", "trimStart": 1, "trimEnd": 7, "device": "android", "label": "Checkout" }
+  { "src": "checkout.mp4", "trimStart": 1, "trimEnd": 7, "device": "android", "label": "Checkout" }
 ],
 "shadow": { "enabled": true, "blur": 50, "offsetY": 16, "opacity": 0.08 }
 ```
 
-Run `npm run render`.
+Run `npm run render -- compare`.
 
 ### 4. "Make it a Pixel 9 Pro in porcelain."
 
-Edit the clip in `showcase.json`:
+Edit the clip in the showcase's `showcase.json`:
 
 ```json
-{ "src": "sample-a.mp4", "trimStart": 0.5, "trimEnd": 5.5, "device": "pixel-9-pro", "finish": "porcelain" }
+{ "src": "demo.mp4", "device": "pixel-9-pro", "finish": "porcelain" }
 ```
 
-Run `npm run render`. If the user names a colour that model does not come in, validation lists the valid ones; pick the closest and say so.
+Run `npm run render -- demo`. If the user names a colour that model does not
+come in, validation lists the valid ones; pick the closest and say so.
 
 ### 5. "I need a vertical version for Instagram with just the first clip."
 
-Create `examples/vertical.json` rather than overwriting the default:
-
-```json
-{
-  "output": { "width": 1080, "height": 1920, "fps": 30 },
-  "background": "#FFFFFF",
-  "clips": [
-    { "src": "sample-a.mp4", "trimStart": 0.5, "trimEnd": 5.5, "device": "iphone", "label": "Browse" }
-  ],
-  "layout": "single",
-  "shadow": { "enabled": true, "blur": 40, "offsetY": 20, "opacity": 0.18 },
-  "intro": 0.5,
-  "outro": 0.5
-}
-```
-
-Render it to its own file so the default output is untouched:
+Make a second showcase from the same recording rather than overwriting the
+first one:
 
 ```bash
-npm run render -- out/vertical.mp4 --props=examples/vertical.json
+npm run new -- showcases/compare/browse.mp4 --name compare-vertical
+```
+
+Then set `output` in `showcases/compare-vertical/showcase.json`:
+
+```json
+"output": { "width": 1080, "height": 1920, "fps": 30 }
+```
+
+Copy over any trims and labels the user wants kept, and render it to its own
+file so the first showcase is untouched:
+
+```bash
+npm run render -- compare-vertical
 ```
