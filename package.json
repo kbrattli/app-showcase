@@ -1,8 +1,11 @@
 {
-  "name": "app-showcase",
+  "name": "prompt-app-showcase",
   "version": "1.0.0",
   "description": "Cloneable, AI-editable Remotion toolkit that turns mobile screen recordings into a showcase MP4",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kbrattli/prompt-app-showcase.git"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=20"

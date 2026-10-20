@@ -1,4 +1,4 @@
-# Guide for AI agents working in app-showcase
+# Guide for AI agents working in prompt-app-showcase
 
 You are working in a Remotion project that turns mobile screen recordings into
 a showcase MP4. Every video the user makes lives in its own untracked folder

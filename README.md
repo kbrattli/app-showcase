@@ -1,4 +1,4 @@
-# app-showcase
+# prompt-app-showcase
 
 Turn one or two mobile screen recordings into a polished showcase MP4: real phone
 models drawn as vector art, a flat background, a soft shadow, and a fade in and out. The
@@ -16,7 +16,7 @@ change it without touching React code. Built with [Remotion](https://www.remotio
 1. Clone and install:
 
    ```bash
-   git clone <this repo> app-showcase && cd app-showcase && npm install
+   git clone https://github.com/kbrattli/prompt-app-showcase.git && cd prompt-app-showcase && npm install
    ```
 
 2. Start a showcase from your screen recording (MP4 with H.264 is the safe
