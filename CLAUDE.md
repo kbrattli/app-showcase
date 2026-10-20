@@ -33,21 +33,29 @@ exactly this, without asking questions:
    never ask for, search for or suggest a bezel image, a PNG, a mock-up or any
    other file to show what the phone looks like. The tool already knows.
 2. Create the showcase from the recording. If the message came with a file or
-   a path, pass it to `npm run new`; the script names the folder after the
-   file, copies the recording in (spaces become `-`) and writes a default
-   `showcase.json`. Ask only if there is no file at all.
+   a path, pass it to `npm run new`, which copies the recording into a new
+   folder and writes a default `showcase.json`. Ask only if there is no file
+   at all.
 
    ```bash
-   npm run new -- ~/Desktop/demo.mp4 --device iphone-15-pro
+   npm run new -- ~/Desktop/demo.mp4 --name demo --device iphone-15-pro
    ```
+
+   **Name the folder after what the video shows**, with `--name`: the app or
+   feature the user mentions ("mobylity", "checkout-flow"), or, if they say
+   nothing, what the recording clearly is. Never leave a random file name
+   as the folder name: attachments and screen recordings arrive as
+   `a0a788ab-….mp4`, `IMG_4821.mov` or `Screen Recording 2025-10-20….mp4`,
+   and `showcases/a0a788ab-…/` tells nobody what it is. With `--name` the
+   single recording is copied as `<name>.mp4` too. Keep the name short,
+   lowercase, words joined with `-`.
 
    This creates `showcases/demo/demo.mp4` and `showcases/demo/showcase.json`
    with one clip and nothing the user did not ask for: no `trimStart` /
    `trimEnd` (the whole recording plays), no `label`, no `finish` unless a
    colour was named (`--finish black`), default `output`, `background` and
-   `shadow`, and `"layout": "single"`. If the user named the showcase, add
-   `--name <that>`. Do not edit the generated file unless the request asks
-   for more than a model and a colour.
+   `shadow`, and `"layout": "single"`. Do not edit the generated file unless
+   the request asks for more than a model and a colour.
 3. Run `npm run render -- demo` (the folder name).
 4. Hand over `showcases/demo/showcase.mp4` and stop. One request, one MP4: do
    not render stills, other models or variants, unless asked.
@@ -212,7 +220,7 @@ Studio's props panel cannot save back to the file, so make edits in
 ### 1. "Make an app showcase for this video, iPhone 15 Pro." (with `~/Desktop/demo.mp4` attached)
 
 ```bash
-npm run new -- ~/Desktop/demo.mp4 --device iphone-15-pro
+npm run new -- ~/Desktop/demo.mp4 --name demo --device iphone-15-pro
 ```
 
 That creates `showcases/demo/demo.mp4` and `showcases/demo/showcase.json`

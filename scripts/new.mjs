@@ -5,15 +5,19 @@
 //   npm run new -- before.mp4 after.mp4 --name compare     (two clips, side by side)
 //
 // Creates showcases/<name>/ with a copy of each recording and a showcase.json
-// that plays the whole recording in the chosen phone. Nothing under
-// showcases/ is tracked by git. Render it with `npm run render -- <name>`.
+// that plays the whole recording in the chosen phone. With --name and a
+// single recording, the copy is renamed <name>.<ext> so a random file name
+// (a UUID, "Screen Recording 2025-10-20...") does not end up in the folder.
+// Nothing under showcases/ is tracked by git. Render it with
+// `npm run render -- <name>`.
 import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { display, root } from "./remotion.mjs";
 
 const usage = `Usage: npm run new -- <recording.mp4> [<second.mp4>] [--name <folder>] [--device <model>] [--finish <colour>]
 
-  --name    Folder under showcases/ (default: the first recording's file name)
+  --name    Folder under showcases/ (default: the first recording's file name).
+            A single recording is also renamed <name>.<ext> inside the folder.
   --device  iphone (default), android, none, or a model id such as iphone-15-pro
   --finish  A body colour that model comes in, e.g. black, porcelain`;
 
@@ -65,7 +69,10 @@ if (existsSync(configPath)) {
 mkdirSync(folder, { recursive: true });
 
 const clips = videos.map((video) => {
-  const fileName = path.basename(video).replace(/\s+/g, "-");
+  const fileName =
+    options.name && videos.length === 1
+      ? `${name}${path.extname(video).toLowerCase()}`
+      : path.basename(video).replace(/\s+/g, "-");
   const destination = path.join(folder, fileName);
   if (path.resolve(destination) !== video) copyFileSync(video, destination);
   const clip = { src: fileName, device: options.device ?? "iphone" };

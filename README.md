@@ -69,7 +69,7 @@ file to show what the phone looks like. Any model from the table below works
 
 | Command | What it does |
 | --- | --- |
-| `npm run new -- <video> [<video2>] [--name x] [--device id] [--finish colour]` | Creates `showcases/<name>/` with a copy of the recording(s) and a default `showcase.json`. Two videos give a side-by-side showcase. |
+| `npm run new -- <video> [<video2>] [--name x] [--device id] [--finish colour]` | Creates `showcases/<name>/` with a copy of the recording(s) and a default `showcase.json`. With `--name`, a single recording is copied as `<name>.mp4`, so a `Screen Recording 2025….mp4` becomes `showcases/checkout/checkout.mp4`. Two videos give a side-by-side showcase. |
 | `npm run render -- <name>` | Renders `showcases/<name>/showcase.json` to `showcases/<name>/showcase.mp4`. `showcases/<name>` works too. |
 | `npm run render -- <name> other.mp4` | Second argument is the output path. Other flags go to `remotion render` as `--flag=value`. |
 | `npm run render` | Renders `examples/sample.json` to `out/sample.mp4` (fresh-clone smoke test). |
